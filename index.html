@@ -1,0 +1,2541 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Paspor Misi Informatika & Smartboard Hub - SMA Kartika XIX-1 Bandung</title>
+    <meta name="app-version" content="FINAL-REALTIME-EPOCH-2026-08-18">
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --nav-dark: #1F2A44;
+            --sage: #7C9A8E;
+            --beige: #F3EDE4;
+            --cool-gray: #D9DEE5;
+            --charcoal: #2F343B;
+        }
+        body {
+            background-color: var(--beige);
+            color: var(--charcoal);
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 280px;
+            max-height: 320px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 320px;
+            }
+        }
+        .stamp-badge {
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .stamp-badge.active {
+            transform: scale(1.03) rotate(-1deg);
+        }
+        @keyframes bounce-subtle {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-6px); }
+        }
+        .animate-bounce-subtle {
+            animation: bounce-subtle 2s infinite;
+        }
+
+        /* Modal PIN Guru */
+        #guruPinModal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 1000;
+            background: rgba(15, 23, 42, 0.68);
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+        #guruPinModal.show { display: flex; }
+        #guruPinModal .pin-modal-card {
+            width: min(100%, 340px);
+            background: #D9DEE5;
+            border: 1px solid #D9DEE5;
+            border-radius: 18px;
+            box-shadow: 0 18px 38px rgba(0,0,0,.25);
+            padding: 20px;
+        }
+        #guruPinInput {
+            letter-spacing: .35em;
+            text-align: center;
+        }
+        #guruPinInput::placeholder {
+            letter-spacing: normal;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col font-sans">
+
+    <!-- Top Announcement & Mode Switch Header -->
+    <header style="background-color: #1F2A44;" class="text-white shadow-lg sticky top-0 z-40">
+        <div class="max-w-6xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3">
+            <div class="flex items-center space-x-3">
+                <span class="text-3xl">🛂</span>
+                <div>
+                    <h1 class="font-bold text-lg leading-tight text-white">TP X-LD-04 PASPOR MISI</h1>
+                    <p class="text-xs text-[#D9DEE5]">Aplikasi Perkantoran • SMA Kartika XIX-1 Bandung (Fase E / Kelas X)</p>
+                </div>
+            </div>
+
+            <!-- View Switchers (Smartboard, Murid, Guru) -->
+            <div class="flex items-center gap-4">
+                <!-- Mode Toggle Buttons -->
+                <div style="background-color: #2F343B;" class="p-1.5 rounded-xl border border-slate-700 flex text-xs gap-1">
+                    <button type="button" onclick="switchMainView('smartboard')" id="btnViewSmartboard" class="px-3 py-1.5 rounded-lg font-bold bg-[#7C9A8E] text-[#1F2A44] shadow flex items-center gap-1.5 transition">
+                        <span>🖥️</span> Ruang Diskusi
+                    </button>
+                    <button type="button" onclick="switchMainView('Murid')" id="btnViewMurid" class="px-3 py-1.5 rounded-lg font-bold text-white hover:text-slate-200 flex items-center gap-1.5 transition">
+                        <span>👨‍🎓</span> Paspor Murid
+                    </button>
+                    <button type="button" onclick="switchMainView('guru')" id="btnViewGuru" class="px-3 py-1.5 rounded-lg font-bold text-white hover:text-slate-200 flex items-center gap-1.5 transition">
+                        <span>🔒</span> Dasbor Guru
+                    </button>
+                </div>
+
+                <!-- Quick Progress Tracker (Murid Mode Only) -->
+                <div id="headerProgress" class="hidden sm:flex items-center gap-3 text-xs border-l border-slate-600 pl-4">
+                    <div class="text-right">
+                        <div class="text-[#D9DEE5]">Progres Stempel</div>
+                        <div id="progressText" class="font-bold text-white">0 / 4 Stempel</div>
+                    </div>
+                    <div style="background-color: #2F343B;" class="w-24 rounded-full h-3 p-0.5 border border-slate-700">
+                        <div id="progressBar" class="bg-[#7C9A8E] h-full rounded-full transition-all duration-500 w-0"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Modal PIN Akses Dasbor Guru -->
+    <div id="guruPinModal" role="dialog" aria-modal="true" aria-labelledby="guruPinTitle">
+        <div class="pin-modal-card">
+            <div class="flex items-center gap-2.5 mb-3">
+                <div style="background-color:#7C9A8E; color:#1F2A44;" class="w-8 h-8 rounded-lg flex items-center justify-center text-sm">🔒</div>
+                <div>
+                    <h3 id="guruPinTitle" style="color:#1F2A44;" class="font-bold text-sm">Akses Dasbor Guru</h3>
+                </div>
+            </div>
+            <input
+                type="password"
+                id="guruPinInput"
+                inputmode="numeric"
+                autocomplete="off"
+                maxlength="20"
+                placeholder="Masukkan PIN"
+                class="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white text-sm font-bold focus:ring-2 focus:ring-[#1F2A44] focus:outline-none"
+            >
+            <p class="text-[10px] text-slate-500 mt-1">Masukkan PIN dengan benar.</p>
+            <div class="flex justify-end gap-2 mt-4">
+                <button type="button" onclick="closeGuruPinModal()" class="px-3.5 py-1.5 rounded-lg bg-slate-300 text-slate-800 font-bold text-xs hover:bg-slate-400">Batal</button>
+                <button type="button" onclick="verifyGuruPin()" style="background-color:#1F2A44; color:#FFFFFF;" class="px-4 py-1.5 rounded-lg font-bold text-xs shadow hover:opacity-90">Masuk</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content Container -->
+    <main class="max-w-6xl mx-auto px-4 py-6 flex-grow w-full space-y-6">
+
+        <!-- ================= VIEW 1: Ruang Diskusi GURU ================= -->
+        <div id="view-smartboard" class="space-y-6">
+            <!-- Smartboard Secondary Navigation Tabs -->
+            <div style="background-color: #F3EDE4; border-color: #D9DEE5;" class="flex flex-wrap items-center justify-between gap-3 p-3 rounded-xl border shadow-sm">
+                <div class="flex gap-2">
+                    <button type="button" onclick="switchSmartboardTab('polling')" id="sbTabBtn-polling" style="background-color: #1F2A44; color: #FFFFFF;" class="px-4 py-2 rounded-lg text-xs font-bold shadow flex items-center gap-2 transition">
+                        <span>📊</span> Polling Asesmen Awal
+                    </button>
+                    <button type="button" onclick="switchSmartboardTab('timer')" id="sbTabBtn-timer" style="background-color: #D9DEE5; color: #2F343B;" class="px-4 py-2 rounded-lg text-xs font-bold hover:bg-slate-300 flex items-center gap-2 transition">
+                        <span>⏱️</span> Timer & Alur Rotasi
+                    </button>
+                    <button type="button" onclick="switchSmartboardTab('refleksi')" id="sbTabBtn-refleksi" style="background-color: #D9DEE5; color: #2F343B;" class="px-4 py-2 rounded-lg text-xs font-bold hover:bg-slate-300 flex items-center gap-2 transition">
+                        <span>💡</span> Refleksi Bersama
+                    </button>
+                </div>
+                <span style="background-color: #1F2A44; color: #FFFFFF;" class="text-xs font-bold px-3 py-1 rounded-full">
+                    🖥️ Mode Tampilan Ruang Diskusi
+                </span>
+            </div>
+
+            <!-- SMARTBOARD TAB 1: POLLING ASESMEN AWAL (LEVEL 1 & LEVEL 2) -->
+            <div id="sbContent-polling" class="smartboard-section space-y-4">
+                <div style="background-color: #D9DEE5; border-left-color: #1F2A44;" class="border-l-4 p-4 rounded-r-lg flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                    <div>
+                        <h3 style="color: #1F2A44;" class="font-bold text-base">📊 ASESMEN AWAL DIAGNOSTIK (POLLING KELAS SMARTBOARD)</h3>
+                        <p class="text-xs text-[#2F343B] mt-1 leading-relaxed font-medium">
+                            Sentuh tombol pilihan di ruang diskusi berdasarkan tunjuk tangan Murid untuk memetakan kesiapan awal kelas secara langsung.
+                        </p>
+                    </div>
+                    <div style="background-color: #F3EDE4; border-color: #D9DEE5;" class="flex gap-2 p-1 rounded-lg border">
+                        <button type="button" onclick="switchPollLevel(1)" id="pollLevelBtn1" style="background-color: #1F2A44; color: #FFFFFF;" class="px-3 py-1.5 rounded font-bold text-xs shadow">Level 1 (Frekuensi)</button>
+                        <button type="button" onclick="switchPollLevel(2)" id="pollLevelBtn2" style="background-color: #D9DEE5; color: #2F343B;" class="px-3 py-1.5 rounded font-bold text-xs hover:bg-slate-300">Level 2 (Pilihan Aplikasi)</button>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Left: Interactive Voting Touch Card -->
+                    <div style="background-color: #F3EDE4; border-color: #D9DEE5;" class="p-6 rounded-2xl border shadow-sm space-y-5">
+                        <div class="flex items-center justify-between border-b border-slate-300 pb-3">
+                            <span id="pollCategoryBadge" style="color: #FFFFFF; background-color: #1F2A44;" class="text-xs font-bold uppercase px-2.5 py-1 rounded">Polling Level 1</span>
+                            <span style="background-color: #7C9A8E; color: #1F2A44;" class="text-xs font-bold px-2.5 py-1 rounded">Smartboard Touch</span>
+                        </div>
+
+                        <h4 id="pollQuestionText" style="color: #1F2A44;" class="font-extrabold text-base leading-snug">
+                            "Seberapa Sering Kamu Menggunakan Aplikasi Office?"
+                        </h4>
+
+                        <div id="pollOptionsContainer" class="space-y-3 pt-2">
+                            <!-- Populated dynamically via JS -->
+                        </div>
+
+                        <div class="pt-3 border-t border-slate-300 flex items-center justify-between text-xs">
+                            <span class="text-[#2F343B] font-semibold">Total Suara Masuk: <strong id="totalVotesCount" class="text-[#1F2A44] font-bold">0</strong> Murid</span>
+                            <button type="button" onclick="resetPollVotes()" class="text-rose-700 hover:text-rose-900 font-semibold">🔄 Reset Hasil Polling</button>
+                        </div>
+                    </div>
+
+                    <!-- Right: Real-Time Chart.js Visualization -->
+                    <div style="background-color: #F3EDE4; border-color: #D9DEE5;" class="p-6 rounded-2xl border shadow-sm space-y-4 flex flex-col justify-between">
+                        <div class="flex items-center justify-between border-b border-slate-300 pb-3">
+                            <h4 style="color: #1F2A44;" class="font-bold text-sm">📊 Hasil Polling Diagnostik Real-Time</h4>
+                            <span class="text-[10px] text-slate-600 font-mono font-bold">Chart.js Engine</span>
+                        </div>
+                        <div class="chart-container flex-grow bg-white p-3 rounded-xl border border-slate-300">
+                            <canvas id="smartboardPollChart"></canvas>
+                        </div>
+                        <p class="text-[11px] text-[#2F343B] text-center font-medium">Grafik ini langsung memperbarui presentase kesiapan belajar kelas di depan layar smartboard.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SMARTBOARD TAB 2: TIMER ROTASI STASIUN & ALUR WAKTU -->
+            <div id="sbContent-timer" class="smartboard-section hidden space-y-6">
+                <div style="background-color: #D9DEE5; border-left-color: #1F2A44;" class="border-l-4 p-4 rounded-r-lg">
+                    <h3 style="color: #1F2A44;" class="font-bold text-base">⏱️ PENGATUR WAKTU (TIMER) & ALUR ROTASI STASIUN</h3>
+                    <p class="text-xs text-[#2F343B] mt-1 leading-relaxed font-medium">
+                        Alokasi waktu total pembelajaran: Durasi per stasiun dapat diatur fleksibel dan dikunci eksklusif oleh Guru di bawah ini (Default: 16 Menit). Murid di perangkat mereka tidak dapat mengubah waktu ini.
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div style="background-color: #1F2A44;" class="text-white p-6 rounded-2xl shadow-lg text-center flex flex-col justify-center">
+                        <span class="text-xs text-[#D9DEE5] uppercase font-extrabold tracking-wider">Status Waktu Aktif</span>
+                        <div id="timerDisplay" class="text-6xl font-mono font-black text-white my-3">16:00</div>
+                        <div id="timerStatusLabel" class="text-xs text-[#D9DEE5]">Rotasi Stasiun Berjalan</div>
+                    </div>
+                    <div style="background-color: #F3EDE4; border-color: #D9DEE5;" class="p-6 rounded-2xl border shadow-sm flex flex-col justify-between items-center text-center space-y-3">
+                        <span class="text-xs font-bold text-[#1F2A44] uppercase">Kontrol Smartboard Timer (Khusus Guru)</span>
+                        <!-- Custom Timer Settings -->
+                        <div class="w-full bg-white p-2.5 rounded-lg border border-slate-300 flex items-center justify-between text-xs">
+                            <label for="customMinutesInput" class="font-semibold text-slate-700">Durasi (Menit):</label>
+                            <div class="flex items-center gap-1.5">
+                                <input type="number" id="customMinutesInput" min="1" max="60" value="16" class="w-16 p-1 text-center font-mono border border-slate-300 rounded text-xs font-bold focus:outline-none">
+                                <button type="button" onclick="applyCustomTimer()" style="background-color: #1F2A44; color: #FFFFFF;" class="font-bold px-2.5 py-1 rounded hover:opacity-90">Set</button>
+                            </div>
+                        </div>
+                        <div class="flex gap-2 w-full">
+                            <button type="button" onclick="startTimer()" style="background-color: #1F2A44; color: #FFFFFF;" class="w-1/3 font-bold text-xs py-2 rounded-xl shadow hover:opacity-90">Mulai</button>
+                            <button type="button" onclick="pauseTimer()" class="w-1/3 bg-amber-700 text-white font-bold text-xs py-2 rounded-xl shadow">Jeda</button>
+                            <button type="button" onclick="resetTimer()" class="w-1/3 bg-rose-800 text-white font-bold text-xs py-2 rounded-xl shadow">Reset</button>
+                        </div>
+                    </div>
+                    <div style="background-color: #F3EDE4; border-color: #D9DEE5;" class="p-6 rounded-2xl border shadow-sm text-left space-y-2">
+                        <span style="color: #1F2A44;" class="text-xs font-bold uppercase block">Skema Rotasi Searah</span>
+                        <p class="text-[11px] text-[#2F343B] leading-relaxed font-medium">
+                            • Kel. 1, 2, 3, & 4: Word ➔ Excel ➔ PPT<br>
+                            • Kel. 5, 6, 7 & 8: Excel ➔ PPT ➔ Word<br>
+                            • Kel. 9, 10, 11 & 12: PPT ➔ Word ➔ Excel
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Detail Alur Waktu Rotasi (Sesuai Lampiran Guru) -->
+                <div style="background-color: #F3EDE4; border-color: #D9DEE5;" class="rounded-2xl border shadow-sm overflow-hidden p-5 space-y-3">
+                    <h4 style="color: #1F2A44;" class="font-bold text-sm flex items-center gap-2">
+                        <span>📋 Panduan Alur Waktu Pembelajaran Inti (Total 60 Menit)</span>
+                    </h4>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-xs text-left border-collapse border border-slate-300">
+                            <thead style="background-color: #1F2A44; color: #FFFFFF;" class="uppercase text-[10px]">
+                                <tr>
+                                    <th class="p-2.5 border border-slate-600 w-36">Segmen Waktu</th>
+                                    <th class="p-2.5 border border-slate-600 w-24 text-center">Durasi</th>
+                                    <th class="p-2.5 border border-slate-600">Kegiatan Utama di Kelas</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-300 text-slate-900 bg-white">
+                                <tr>
+                                    <td class="p-2.5 border font-bold">Menit ke-0 s.d. 3</td>
+                                    <td class="p-2.5 border text-center font-mono font-bold">3 Menit</td>
+                                    <td class="p-2.5 border">Guru menjelaskan skema rotasi di Smartboard dan menempatkan tiap kelompok ke stasiun awal.</td>
+                                </tr>
+                                <tr style="background-color: #F3EDE4;">
+                                    <td class="p-2.5 border font-bold">Rotasi 1</td>
+                                    <td class="p-2.5 border text-center font-mono font-bold">16 Menit</td>
+                                    <td class="p-2.5 border">Kelompok bekerja di stasiun pertama (Memahami fitur + Mengaplikasi tantangan + Verifikasi stempel).</td>
+                                </tr>
+                                <tr>
+                                    <td class="p-2.5 border font-bold">Transisi 1</td>
+                                    <td class="p-2.5 border text-center font-mono font-bold">2 Menit</td>
+                                    <td class="p-2.5 border">Guru memberi aba-aba (bunyi/lonceng timer di Smartboard), kelompok berpindah searah jarum jam.</td>
+                                </tr>
+                                <tr style="background-color: #F3EDE4;">
+                                    <td class="p-2.5 border font-bold">Rotasi 2</td>
+                                    <td class="p-2.5 border text-center font-mono font-bold">16 Menit</td>
+                                    <td class="p-2.5 border">Kelompok bekerja di stasiun kedua.</td>
+                                </tr>
+                                <tr>
+                                    <td class="p-2.5 border font-bold">Transisi 2</td>
+                                    <td class="p-2.5 border text-center font-mono font-bold">2 Menit</td>
+                                    <td class="p-2.5 border">Berpindah ke stasiun ketiga.</td>
+                                </tr>
+                                <tr style="background-color: #F3EDE4;">
+                                    <td class="p-2.5 border font-bold">Rotasi 3</td>
+                                    <td class="p-2.5 border text-center font-mono font-bold">16 Menit</td>
+                                    <td class="p-2.5 border">Kelompok bekerja di stasiun ketiga hingga seluruh Paspor Misi lengkap 3 cap.</td>
+                                </tr>
+                                <tr>
+                                    <td class="p-2.5 border font-bold">Menit ke-55 s.d. 60</td>
+                                    <td class="p-2.5 border text-center font-mono font-bold">5 Menit</td>
+                                    <td class="p-2.5 border">Kelompok merapikan stasiun dan bersiap masuk ke tahap Merefleksi & Exit Ticket.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SMARTBOARD TAB 3: REFLEKSI BERSAMA -->
+            <div id="sbContent-refleksi" class="smartboard-section hidden space-y-4">
+                <div style="background-color: #D9DEE5; border-left-color: #1F2A44;" class="border-l-4 p-4 rounded-r-lg">
+                    <h3 style="color: #1F2A44;" class="font-bold text-base">💡 TIGA PERTANYAAN REFLEKTIF KELAS</h3>
+                    <p class="text-xs text-[#2F343B] mt-1 leading-relaxed font-medium">
+                        Beri waktu 1–2 menit bagi murid untuk menuliskan jawaban di buku/LKPD sebelum didiskusikan bersama di depan kelas.
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <button type="button" onclick="showReflectCard(1)" id="refBtn1" class="p-5 rounded-2xl border-2 border-[#1F2A44] bg-white text-left shadow-sm transition space-y-2">
+                        <span style="color: #1F2A44;" class="text-xs font-extrabold uppercase">Refleksi 1 dari 3</span>
+                        <h4 style="color: #1F2A44;" class="font-bold text-sm">Aplikasi mana yang paling mudah dipelajari hari ini? Mengapa?</h4>
+                    </button>
+                    <button type="button" onclick="showReflectCard(2)" id="refBtn2" class="p-5 rounded-2xl border-2 border-[#1F2A44] bg-white text-left shadow-sm transition space-y-2">
+                        <span class="text-xs font-extrabold text-slate-500 uppercase">Refleksi 2 dari 3</span>
+                        <h4 style="color: #1F2A44;" class="font-bold text-sm">Aplikasi mana yang masih terasa menantang? Bagian mana yang sulit?</h4>
+                    </button>
+                    <button type="button" onclick="showReflectCard(3)" id="refBtn3" class="p-5 rounded-2xl border-2 border-[#1F2A44] bg-white text-left shadow-sm transition space-y-2">
+                        <span class="text-xs font-extrabold text-slate-500 uppercase">Refleksi 3 dari 3</span>
+                        <h4 style="color: #1F2A44;" class="font-bold text-sm">Kapan sebaiknya kita menggunakan Word, Excel, atau PowerPoint?</h4>
+                    </button>
+                </div>
+
+                <div style="background-color: #F3EDE4; border-color: #D9DEE5;" class="text-slate-900 p-8 rounded-2xl border shadow-md text-center space-y-3">
+                    <div id="reflectionDisplayCard"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= VIEW 2: MODE Murid ================= -->
+        <div id="view-Murid" class="hidden space-y-6">
+
+            <!-- Team Setup & Briefing Box -->
+            <section style="background-color: #F3EDE4; border-color: #D9DEE5;" class="rounded-xl p-5 border shadow-sm">
+                <div class="flex flex-col md:flex-row gap-6 items-start md:items-center justify-between">
+                    <div class="space-y-2 max-w-2xl">
+                        <span style="background-color: #1F2A44; color: #FFFFFF;" class="text-xs px-3 py-1 rounded-full font-semibold">🌟 PETUNJUK PRAKTIK & MISI KELOMPOK</span>
+                        <h2 style="color: #1F2A44;" class="text-xl font-bold">Selamat Datang, Tim Digital Explorers!</h2>
+                        <p class="text-sm text-[#2F343B] leading-relaxed font-medium">
+                            Praktikkan setiap tantangan langsung di aplikasi perkantoran komputer kamu (pastikan Word, Excel, PowerPoint dalam kondisi sudah dibuka di laptop masing-masing). Gunakan <b>Paspor Digital</b> ini untuk mencatat fitur yang ditemukan, menguji simulator, mengklaim stempel verifikasi guru, serta menyelesaikan <b>Exit Ticket</b> untuk membuka <b>Sertifikat Keterampilan Digital</b>!
+                        </p>
+                    </div>
+
+                    <!-- Identity Form -->
+                    <div style="background-color: white; border-color: #D9DEE5;" class="border p-4 rounded-lg w-full md:w-80 space-y-3 shadow-inner">
+                        <div class="font-bold text-xs uppercase tracking-wider text-slate-700 flex items-center justify-between">
+                            <span>📋 Identitas Kelompok</span>
+                        </div>
+                        <div>
+                            <label for="groupName" class="block text-xs font-medium text-slate-700 mb-1">Nama Kelompok:</label>
+                            <input type="text" id="groupName" placeholder="Contoh: Kelompok Kartika 1" oninput="saveCurrentGroupSession()" class="w-full text-xs px-3 py-1.5 border border-slate-300 rounded focus:ring-2 focus:ring-[#1F2A44] focus:outline-none">
+                        </div>
+                        <div>
+                            <label for="groupMembers" class="block text-xs font-medium text-slate-700 mb-1">Anggota Tim (3 Orang):</label>
+                            <input type="text" id="groupMembers" placeholder="1) Murid A 2) Murid B 3) Murid C" oninput="saveCurrentGroupSession()" class="w-full text-xs px-3 py-1.5 border border-slate-300 rounded focus:ring-2 focus:ring-[#1F2A44] focus:outline-none">
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Navigation Tabs / Station Map -->
+            <nav class="grid grid-cols-2 sm:grid-cols-4 gap-3" aria-label="Stasiun Misi">
+                <button type="button" onclick="switchTab('stasiun1')" id="tab-stasiun1" style="border-color: #D9DEE5;" class="tab-btn p-3 rounded-xl border bg-white text-left shadow-sm hover:border-[#1F2A44] transition flex flex-col justify-between h-24 relative overflow-hidden">
+                    <div class="flex justify-between items-center w-full">
+                        <span style="color: #1F2A44;" class="text-xs font-bold uppercase tracking-wider">Stasiun 1</span>
+                        <span id="badge-stasiun1" class="text-xs px-2 py-0.5 rounded-full bg-slate-200 text-slate-700 font-medium">Belum</span>
+                    </div>
+                    <div>
+                        <div class="font-bold text-slate-900 text-sm">📝 Word</div>
+                        <div class="text-xs text-slate-600 truncate">Pengolah Kata</div>
+                    </div>
+                    <div style="background-color: #1F2A44;" class="h-1 w-full absolute bottom-0 left-0 hidden" id="indicator-stasiun1"></div>
+                </button>
+
+                <button type="button" onclick="switchTab('stasiun2')" id="tab-stasiun2" style="border-color: #D9DEE5;" class="tab-btn p-3 rounded-xl border bg-white text-left shadow-sm hover:border-[#1F2A44] transition flex flex-col justify-between h-24 relative overflow-hidden">
+                    <div class="flex justify-between items-center w-full">
+                        <span style="color: #1F2A44;" class="text-xs font-bold uppercase tracking-wider">Stasiun 2</span>
+                        <span id="badge-stasiun2" class="text-xs px-2 py-0.5 rounded-full bg-slate-200 text-slate-700 font-medium">Belum</span>
+                    </div>
+                    <div>
+                        <div class="font-bold text-slate-900 text-sm">📊 Excel</div>
+                        <div class="text-xs text-slate-600 truncate">Pengolah Angka</div>
+                    </div>
+                    <div style="background-color: #1F2A44;" class="h-1 w-full absolute bottom-0 left-0 hidden" id="indicator-stasiun2"></div>
+                </button>
+
+                <button type="button" onclick="switchTab('stasiun3')" id="tab-stasiun3" style="border-color: #D9DEE5;" class="tab-btn p-3 rounded-xl border bg-white text-left shadow-sm hover:border-[#1F2A44] transition flex flex-col justify-between h-24 relative overflow-hidden">
+                    <div class="flex justify-between items-center w-full">
+                        <span style="color: #1F2A44;" class="text-xs font-bold uppercase tracking-wider">Stasiun 3</span>
+                        <span id="badge-stasiun3" class="text-xs px-2 py-0.5 rounded-full bg-slate-200 text-slate-700 font-medium">Belum</span>
+                    </div>
+                    <div>
+                        <div class="font-bold text-slate-900 text-sm">💻 PowerPoint</div>
+                        <div class="text-xs text-slate-600 truncate">Pembuat Presentasi</div>
+                    </div>
+                    <div style="background-color: #1F2A44;" class="h-1 w-full absolute bottom-0 left-0 hidden" id="indicator-stasiun3"></div>
+                </button>
+
+                <button type="button" onclick="switchTab('analisis')" id="tab-analisis" style="border-color: #D9DEE5;" class="tab-btn p-3 rounded-xl border bg-white text-left shadow-sm hover:border-[#1F2A44] transition flex flex-col justify-between h-24 relative overflow-hidden">
+                    <div class="flex justify-between items-center w-full">
+                        <span style="color: #1F2A44;" class="text-xs font-bold uppercase tracking-wider">Tahap Akhir</span>
+                        <span id="badge-analisis" class="text-xs px-2 py-0.5 rounded-full bg-slate-200 text-slate-700 font-medium">Belum</span>
+                    </div>
+                    <div>
+                        <div class="font-bold text-slate-900 text-sm">🎟️ Exit Ticket</div>
+                        <div class="text-xs text-slate-600 truncate">Analisis Masalah</div>
+                    </div>
+                    <div style="background-color: #1F2A44;" class="h-1 w-full absolute bottom-0 left-0 hidden" id="indicator-analisis"></div>
+                </button>
+            </nav>
+
+            <!-- Dynamic Content Sections -->
+
+            <!-- STASIUN 1: WORD -->
+            <section id="content-stasiun1" class="station-content space-y-6">
+                <div style="background-color: #F3EDE4; border-left-color: #1F2A44;" class="border-l-4 p-4 rounded-r-lg">
+                    <h3 style="color: #1F2A44;" class="font-bold text-base">🚉 STASIUN 1: PENGOLAH KATA (MICROSOFT WORD / GOOGLE DOCS)</h3>
+                    <p class="text-sm text-[#2F343B] mt-1 leading-relaxed font-medium">
+                        Fokus: Praktikkan pembuatan dokumen pengumuman resmi di Microsoft Word komputer Kamu. Uji penataan teks (Font & Heading), perataan paragraf (Alignment & Spacing), dan penyisipan tabel jadwal.
+                    </p>
+                </div>
+
+                <!-- LKPD Visual Reference Image Slot -->
+                <div style="background-color: #F3EDE4; border-color: #D9DEE5;" class="p-4 rounded-xl border shadow-sm flex flex-col sm:flex-row items-center gap-4">
+                    <div class="w-full sm:w-48 h-32 bg-white border border-slate-300 rounded-lg overflow-hidden flex items-center justify-center p-1">
+                        <img src="https://placehold.co/240x160/1F2A44/FFFFFF?text=LKPD+Word+Guide" alt="Ilustrasi LKPD Word" class="object-cover w-full h-full rounded" onerror="this.src='https://placehold.co/240x160/7C9A8E/1F2A44?text=LKPD+Word'">
+                    </div>
+                    <div class="flex-grow space-y-1">
+                        <span style="color: #1F2A44;" class="text-xs font-bold uppercase tracking-wider block">📖 Panduan Visual LKPD (Stasiun 1)</span>
+                        <h4 style="color: #1F2A44;" class="font-bold text-sm">Referensi Tata Letak Dokumen Surat Resmi</h4>
+                        <p class="text-xs text-[#2F343B]">Gunakan panduan visual di atas untuk menyamakan struktur Heading 1, Alignment, dan Tabel Jadwal pada lembar kerja Word komputer kelompok kamu.</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Fitur Kunci Checklist -->
+                    <div style="background-color: #F3EDE4; border-color: #D9DEE5;" class="p-5 rounded-xl border shadow-sm space-y-4">
+                        <h4 style="color: #1F2A44;" class="font-bold text-sm flex items-center gap-2">
+                            <span>🔍 Identifikasi Fitur Word</span>
+                        </h4>
+                        <div class="space-y-3">
+                            <div class="p-3 bg-white rounded border border-slate-300">
+                                <label style="color: #1F2A44;" class="font-semibold text-xs block">1. Pengaturan Huruf (Font & Heading Style)</label>
+                                <span class="text-xs text-[#1F2A44] font-mono block mt-0.5 font-bold">Home ➔ Font & Styles</span>
+                                <p class="text-xs text-[#2F343B] mt-1">Fungsi: Mengatur jenis/ukuran huruf dan menentukan tingkatan struktur judul pada dokumen cetak.</p>
+                            </div>
+                            <div class="p-3 bg-white rounded border border-slate-300">
+                                <label style="color: #1F2A44;" class="font-semibold text-xs block">2. Paragraf (Alignment & Spacing)</label>
+                                <span class="text-xs text-[#1F2A44] font-mono block mt-0.5 font-bold">Home ➔ Paragraph</span>
+                                <p class="text-xs text-[#2F343B] mt-1">Fungsi: Mengatur posisi teks (Rata Kanan/Kiri/Tengah/Justify) serta spasi antarbaris kalimat.</p>
+                            </div>
+                            <div class="p-3 bg-white rounded border border-slate-300">
+                                <label style="color: #1F2A44;" class="font-semibold text-xs block">3. Penyisipan Tabel Sederhana</label>
+                                <span class="text-xs text-[#1F2A44] font-mono block mt-0.5 font-bold">Insert ➔ Table</span>
+                                <p class="text-xs text-[#2F343B] mt-1">Fungsi: Menyusun informasi berbentuk baris dan kolom agar jadwal atau daftar data tersusun rapi.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Interactive Word Challenge Playground -->
+                    <div style="background-color: #F3EDE4; border-color: #D9DEE5;" class="p-5 rounded-xl border shadow-sm space-y-4">
+                        <div class="flex items-center justify-between">
+                            <h4 style="color: #1F2A44;" class="font-bold text-sm flex items-center gap-2">
+                                <span>⚡ Tantangan Praktik & Live Preview</span>
+                            </h4>
+                            <span style="background-color: #1F2A44; color: #FFFFFF;" class="text-xs font-semibold px-2 py-0.5 rounded">SMA Kartika XIX-1</span>
+                        </div>
+                        <p class="text-xs text-[#2F343B]">Ketikkan draf pengumuman sekolah di bawah ini untuk mensimulasikan tata letak cetak dokumen Word kamu:</p>
+
+                        <div class="space-y-3">
+                            <div>
+                                <label for="wTitle" class="block text-xs font-semibold text-slate-700">Judul Dokumen (Heading 1):</label>
+                                <input type="text" id="wTitle" value="PENGUMUMAN BAKTI SOSIAL DAN PENGABDIAN MASYARAKAT SMA KARTIKA XIX-1 BANDUNG" oninput="updateWordPreview()" class="w-full text-xs p-2 border border-slate-300 rounded focus:ring-1 focus:ring-[#1F2A44]">
+                            </div>
+                            <div class="grid grid-cols-1 gap-2">
+                                <div>
+                                    <label for="wPara1" class="block text-xs font-semibold text-slate-700">Paragraf 1 (Latar Belakang Kegiatan):</label>
+                                    <textarea id="wPara1" rows="2" oninput="updateWordPreview()" class="w-full text-xs p-2 border border-slate-300 rounded focus:ring-1 focus:ring-[#1F2A44]">Dalam rangka memperingati Hari Kepedulian Sosial dan HUT SMA Kartika XIX-1 Bandung, Organisasi Murid Intra Sekolah (OSIS) akan menyelenggarakan aksi Bakti Sosial dan Pengabdian Masyarakat bagi warga di lingkungan sekitar sekolah.</textarea>
+                                </div>
+                                <div>
+                                    <label for="wPara2" class="block text-xs font-semibold text-slate-700">Paragraf 2 (Imbauan Partisipasi Murid):</label>
+                                    <textarea id="wPara2" rows="2" oninput="updateWordPreview()" class="w-full text-xs p-2 border border-slate-300 rounded focus:ring-1 focus:ring-[#1F2A44]">Seluruh Murid kelas X, XI, dan XII diimbau untuk berpartisipasi aktif dengan mengumpulkan bantuan berupa barang kebutuhan pokok (sembako) atau perlengkapan alat tulis kepada pengurus OSIS melalui wali kelas masing-masing paling lambat hari Jumat mendatang.</textarea>
+                                </div>
+                            </div>
+
+                            <!-- Document Canvas Simulator -->
+                            <div class="mt-4 p-4 bg-white border border-slate-300 shadow-md rounded min-h-[160px] text-slate-900 font-serif space-y-3">
+                                <h3 id="prevTitle" class="text-center font-bold text-xs text-[#1F2A44] tracking-wide underline uppercase"></h3>
+                                <p id="prevP1" class="text-xs leading-relaxed text-justify indent-4 font-sans"></p>
+                                <p id="prevP2" class="text-xs leading-relaxed text-justify indent-4 font-sans"></p>
+
+                                <div class="mt-2 font-sans">
+                                    <span class="text-[10px] font-bold text-slate-600 uppercase block mb-1">Tabel Agenda Kegiatan (Word Table):</span>
+                                    <table class="w-full text-[11px] border-collapse border border-slate-400">
+                                        <thead>
+                                            <tr style="background-color: #D9DEE5; color: #1F2A44;" class="border border-slate-400 font-bold">
+                                                <th class="border border-slate-400 px-2 py-1 text-left">Hari/Tanggal</th>
+                                                <th class="border border-slate-400 px-2 py-1 text-left">Agenda Kegiatan SMA Kartika XIX-1</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td class="border border-slate-400 px-2 py-1">Kamis, 20 Ags</td>
+                                                <td class="border border-slate-400 px-2 py-1">Pengumpulan & Pemilahan Bantuan Sembako</td>
+                                            </tr>
+                                            <tr class="bg-slate-50">
+                                                <td class="border border-slate-400 px-2 py-1">Jumat, 21 Ags</td>
+                                                <td class="border border-slate-400 px-2 py-1">Penyaluran Bantuan ke Panti & Warga Sekitar</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Stamp Action -->
+                        <div class="pt-3 border-t border-slate-300 flex items-center justify-between">
+                            <span class="text-xs text-[#2F343B]">Tunjukkan hasil praktik aplikasi Word di laptop kamu ke Guru</span>
+                            <button type="button" onclick="claimStamp('stasiun1')" id="btnStamp1" style="background-color: #1F2A44; color: #FFFFFF;" class="font-semibold text-xs px-4 py-2 rounded-lg shadow transition flex items-center gap-1.5 hover:opacity-90">
+                                <span>🖋️ Klaim Stempel Word</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- STASIUN 2: EXCEL -->
+            <section id="content-stasiun2" class="station-content hidden space-y-6">
+                <div style="background-color: #F3EDE4; border-left-color: #1F2A44;" class="border-l-4 p-4 rounded-r-lg">
+                    <h3 style="color: #1F2A44;" class="font-bold text-base">🚉 STASIUN 2: PENGOLAH ANGKA (MICROSOFT EXCEL / GOOGLE SHEETS)</h3>
+                    <p class="text-sm text-[#2F343B] mt-1 leading-relaxed font-medium">
+                        Fokus: Buka Microsoft Excel di komputer kamu. Buat tabel nilai Murid, terapkan rumus `=SUM` dan `=AVERAGE`, lalu buat Grafik Batang visual.
+                    </p>
+                </div>
+
+                <!-- LKPD Visual Reference Image Slot -->
+                <div style="background-color: #F3EDE4; border-color: #D9DEE5;" class="p-4 rounded-xl border shadow-sm flex flex-col sm:flex-row items-center gap-4">
+                    <div class="w-full sm:w-48 h-32 bg-white border border-slate-300 rounded-lg overflow-hidden flex items-center justify-center p-1">
+                        <img src="https://placehold.co/240x160/7C9A8E/FFFFFF?text=LKPD+Excel+Guide" alt="Ilustrasi LKPD Excel" class="object-cover w-full h-full rounded" onerror="this.src='https://placehold.co/240x160/1F2A44/FFFFFF?text=LKPD+Excel'">
+                    </div>
+                    <div class="flex-grow space-y-1">
+                        <span style="color: #1F2A44;" class="text-xs font-bold uppercase tracking-wider block">📖 Panduan Visual LKPD (Stasiun 2)</span>
+                        <h4 style="color: #1F2A44;" class="font-bold text-sm">Referensi Tabel Nilai & Rumus Formula Excel</h4>
+                        <p class="text-xs text-[#2F343B]">Perhatikan ilustrasi LKPD di atas untuk memastikan sel formula SUM dan AVERAGE diterapkan pada kolom B secara benar di lembar kerja Excel kamu.</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Fitur Kunci Checklist -->
+                    <div style="background-color: #F3EDE4; border-color: #D9DEE5;" class="p-5 rounded-xl border shadow-sm space-y-4">
+                        <h4 style="color: #1F2A44;" class="font-bold text-sm flex items-center gap-2">
+                            <span>🔍 Identifikasi Fitur Excel</span>
+                        </h4>
+                        <div class="space-y-3">
+                            <div class="p-3 bg-white rounded border border-slate-300">
+                                <label style="color: #1F2A44;" class="font-semibold text-xs block">1. Sel & Rentang Sel (Range)</label>
+                                <p class="text-xs text-[#2F343B] mt-1">Sel: Alamat perpotongan kolom & baris (misal: `B2`). Range: Kumpulan beberapa sel (misal: `B2:B6`).</p>
+                            </div>
+                            <div class="p-3 bg-white rounded border border-slate-300">
+                                <label style="color: #1F2A44;" class="font-semibold text-xs block">2. Formula Perhitungan Otomatis</label>
+                                <div class="mt-1 space-y-1 text-xs">
+                                    <p><code class="bg-slate-200 px-1 py-0.5 rounded text-[#1F2A44] font-mono font-bold">=SUM(B2:B6)</code> : Menghitung total jumlah seluruh angka.</p>
+                                    <p><code class="bg-slate-200 px-1 py-0.5 rounded text-[#1F2A44] font-mono font-bold">=AVERAGE(B2:B6)</code> : Menghitung rata-rata nilai kelas.</p>
+                                </div>
+                            </div>
+                            <div class="p-3 bg-white rounded border border-slate-300">
+                                <label style="color: #1F2A44;" class="font-semibold text-xs block">3. Pembuatan Grafik Batang (Bar Chart)</label>
+                                <span class="text-xs text-[#1F2A44] font-mono block mt-0.5 font-bold">Insert ➔ Charts ➔ Column/Bar Chart</span>
+                                <p class="text-xs text-[#2F343B] mt-1">Fungsi: Mengubah barisan angka menjadi diagram batang visual agar tren nilai mudah dianalisis.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Interactive Excel Simulator -->
+                    <div style="background-color: #F3EDE4; border-color: #D9DEE5;" class="p-5 rounded-xl border shadow-sm space-y-4">
+                        <div class="flex items-center justify-between">
+                            <h4 style="color: #1F2A44;" class="font-bold text-sm flex items-center gap-2">
+                                <span>⚡ Simulator Perhitungan & Grafik Batang</span>
+                            </h4>
+                            <span style="background-color: #1F2A44; color: #FFFFFF;" class="text-xs font-semibold px-2 py-0.5 rounded">Live Calculation</span>
+                        </div>
+                        <p class="text-xs text-[#2F343B]">Masukkan 5 data nilai hasil praktik Excel komputer kamu ke tabel simulator di bawah ini:</p>
+
+                        <!-- Spreadsheet Table Simulator -->
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-xs border border-slate-300 rounded">
+                                <thead>
+                                    <tr style="background-color: #1F2A44; color: #FFFFFF;" class="font-mono">
+                                        <th class="p-2 text-center border-r border-slate-600 w-8">#</th>
+                                        <th class="p-2 text-left border-r border-slate-600">Nama Murid (Kolom A)</th>
+                                        <th class="p-2 text-center w-24">Nilai (Kolom B)</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="excelTableBody">
+                                    <!-- Populated dynamically -->
+                                </tbody>
+                                <tfoot style="background-color: #D9DEE5;" class="border-t-2 border-slate-400 font-semibold text-slate-900">
+                                    <tr>
+                                        <td colspan="2" class="p-2 text-right border-r border-slate-300">TOTAL NILAI <span class="font-mono text-xs text-slate-700 font-normal">(=SUM(B2:B6))</span>:</td>
+                                        <td id="calcSum" class="p-2 text-center font-mono font-bold text-[#1F2A44]">0</td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="2" class="p-2 text-right border-r border-slate-300">RATA-RATA KELAS <span class="font-mono text-xs text-slate-700 font-normal">(=AVERAGE(B2:B6))</span>:</td>
+                                        <td id="calcAvg" class="p-2 text-center font-mono font-bold text-[#1F2A44]">0</td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+
+                        <!-- Dynamic Chart Canvas Container -->
+                        <div class="pt-2">
+                            <div class="text-xs font-semibold text-[#2F343B] mb-2 flex items-center justify-between">
+                                <span>📊 Visualisasi Grafik Batang (Bar Chart Excel)</span>
+                                <span class="text-[10px] text-slate-600 font-bold">Chart.js Engine</span>
+                            </div>
+                            <div class="chart-container border border-slate-300 rounded-lg p-2 bg-white">
+                                <canvas id="excelBarChart"></canvas>
+                            </div>
+                        </div>
+
+                        <!-- Stamp Action -->
+                        <div class="pt-3 border-t border-slate-300 flex items-center justify-between">
+                            <span class="text-xs text-[#2F343B]">Tunjukkan hasil rumus & grafik di Excel ke Guru:</span>
+                            <button type="button" onclick="claimStamp('stasiun2')" id="btnStamp2" style="background-color: #1F2A44; color: #FFFFFF;" class="font-semibold text-xs px-4 py-2 rounded-lg shadow transition flex items-center gap-1.5 hover:opacity-90">
+                                <span>📊 Klaim Stempel Excel</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- STASIUN 3: POWERPOINT -->
+            <section id="content-stasiun3" class="station-content hidden space-y-6">
+                <div style="background-color: #F3EDE4; border-left-color: #1F2A44;" class="border-l-4 p-4 rounded-r-lg">
+                    <h3 style="color: #1F2A44;" class="font-bold text-base">🚉 STASIUN 3: PEMBUAT PRESENTASI (MICROSOFT POWERPOINT / GOOGLE SLIDES)</h3>
+                    <p class="text-sm text-[#2F343B] mt-1 leading-relaxed font-medium">
+                        Fokus: Buka Microsoft PowerPoint di komputer. Buat slide perkenalan kelompok (Judul, Teks, Gambar/Tabel), dan berikan efek transisi slide yang mulus.
+                    </p>
+                </div>
+
+                <!-- LKPD Visual Reference Image Slot -->
+                <div style="background-color: #F3EDE4; border-color: #D9DEE5;" class="p-4 rounded-xl border shadow-sm flex flex-col sm:flex-row items-center gap-4">
+                    <div class="w-full sm:w-48 h-32 bg-white border border-slate-300 rounded-lg overflow-hidden flex items-center justify-center p-1">
+                        <img src="https://placehold.co/240x160/2F343B/FFFFFF?text=LKPD+PPT+Guide" alt="Ilustrasi LKPD PPT" class="object-cover w-full h-full rounded" onerror="this.src='https://placehold.co/240x160/1F2A44/FFFFFF?text=LKPD+PPT'">
+                    </div>
+                    <div class="flex-grow space-y-1">
+                        <span style="color: #1F2A44;" class="text-xs font-bold uppercase tracking-wider block">📖 Panduan Visual LKPD (Stasiun 3)</span>
+                        <h4 style="color: #1F2A44;" class="font-bold text-sm">Referensi Tata Letak Layout & Transisi Slide</h4>
+                        <p class="text-xs text-[#2F343B]">Gunakan acuan visual LKPD berikut untuk menyusun tata letak slide judul, penambahan gambar, dan efek transisi presentasi kelompok kamu.</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Fitur Kunci Checklist -->
+                    <div style="background-color: #F3EDE4; border-color: #D9DEE5;" class="p-5 rounded-xl border shadow-sm space-y-4">
+                        <h4 style="color: #1F2A44;" class="font-bold text-sm flex items-center gap-2">
+                            <span>🔍 Identifikasi Fitur PowerPoint</span>
+                        </h4>
+                        <div class="space-y-3">
+                            <div class="p-3 bg-white rounded border border-slate-300">
+                                <label style="color: #1F2A44;" class="font-semibold text-xs block">1. Tata Letak Slide (Layout)</label>
+                                <span class="text-xs text-[#1F2A44] font-mono block mt-0.5 font-bold">Home ➔ Layout (Title Slide, Title & Content, Blank)</span>
+                                <p class="text-xs text-[#2F343B] mt-1">Fungsi: Memilih template struktur posisi judul, poin gagasan, atau area gambar dengan praktis.</p>
+                            </div>
+                            <div class="p-3 bg-white rounded border border-slate-300">
+                                <label style="color: #1F2A44;" class="font-semibold text-xs block">2. Penyisipan Teks, Gambar, & Tabel</label>
+                                <span class="text-xs text-[#1F2A44] font-mono block mt-0.5 font-bold">Insert ➔ Pictures / Text Box / Table</span>
+                                <p class="text-xs text-[#2F343B] mt-1">Fungsi: Menggabungkan poin teks ringkas dengan visual gambar pendukung agar presentasi menarik.</p>
+                            </div>
+                            <div class="p-3 bg-white rounded border border-slate-300">
+                                <label style="color: #1F2A44;" class="font-semibold text-xs block">3. Transisi Slide (Transitions)</label>
+                                <span class="text-xs text-[#1F2A44] font-mono block mt-0.5 font-bold">Transitions ➔ Fade / Push / Wipe</span>
+                                <p class="text-xs text-[#2F343B] mt-1">Fungsi: Memberikan efek animasi perpindahan yang halus antar-slide saat dipresentasikan.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Interactive PowerPoint Challenge Simulator -->
+                    <div style="background-color: #F3EDE4; border-color: #D9DEE5;" class="p-5 rounded-xl border shadow-sm space-y-4">
+                        <div class="flex items-center justify-between">
+                            <h4 style="color: #1F2A44;" class="font-bold text-sm flex items-center gap-2">
+                                <span>⚡ Simulator Slide Presentasi</span>
+                            </h4>
+                            <span style="background-color: #1F2A44; color: #FFFFFF;" class="text-xs font-semibold px-2 py-0.5 rounded">Slide Viewer</span>
+                        </div>
+                        <p class="text-xs text-[#2F343B]">Uji simulasi 3 slide perkenalan kelompok lengkap dengan efek transisi:</p>
+
+                        <!-- Slide Navigation Controls -->
+                        <div class="flex gap-2 border-b border-slate-300 pb-2">
+                            <button type="button" onclick="showSlide(1)" id="btnSlide1" class="px-3 py-1 rounded text-xs font-semibold shadow-sm">Slide 1: Tim Kartika</button>
+                            <button type="button" onclick="showSlide(2)" id="btnSlide2" class="px-3 py-1 rounded text-xs font-semibold bg-[#D9DEE5] text-[#2F343B] hover:bg-slate-300">Slide 2: Fitur</button>
+                            <button type="button" onclick="showSlide(3)" id="btnSlide3" class="px-3 py-1 rounded text-xs font-semibold bg-[#D9DEE5] text-[#2F343B] hover:bg-slate-300">Slide 3: Misi</button>
+                        </div>
+
+                        <!-- Laptop Screen Frame Simulator -->
+                        <div style="background-color: #2F343B;" class="p-3 rounded-xl shadow-xl">
+                            <div class="bg-white rounded-lg p-6 min-h-[200px] flex flex-col justify-center items-center text-center transition-all duration-300 transform" id="slideViewer">
+                                <!-- Slide content dynamically updated -->
+                            </div>
+                        </div>
+
+                        <!-- Slide Transition Selector -->
+                        <div style="background-color: #D9DEE5;" class="flex items-center justify-between p-2 rounded border border-slate-300 text-xs">
+                            <label for="transitionEffect" class="font-semibold text-[#2F343B]">Pilih Efek Transisi Slide:</label>
+                            <select id="transitionEffect" class="border border-slate-300 rounded px-2 py-1 text-xs font-semibold">
+                                <option value="fade">Fade Mulus (Disarankan)</option>
+                                <option value="slide">Slide Horizontal</option>
+                                <option value="zoom">Zoom Scale</option>
+                            </select>
+                        </div>
+
+                        <!-- Stamp Action -->
+                        <div class="pt-3 border-t border-slate-300 flex items-center justify-between">
+                            <span class="text-xs text-[#2F343B]">Tunjukkan slide PowerPoint komputer ke Guru:</span>
+                            <button type="button" onclick="claimStamp('stasiun3')" id="btnStamp3" style="background-color: #1F2A44; color: #FFFFFF;" class="font-semibold text-xs px-4 py-2 rounded-lg shadow transition flex items-center gap-1.5 hover:opacity-90">
+                                <span>💻 Klaim Stempel PPT</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAHAP AKHIR: EXIT TICKET (5 SOAL ANALISIS MASALAH) -->
+            <section id="content-analisis" class="station-content hidden space-y-6">
+                <div style="background-color: #F3EDE4; border-left-color: #1F2A44;" class="border-l-4 p-4 rounded-r-lg">
+                    <h3 style="color: #1F2A44;" class="font-bold text-base">🎟️ TAHAP AKHIR: EXIT TICKET (ANALISIS MASALAH)</h3>
+                    <p class="text-sm text-[#2F343B] mt-1 leading-relaxed font-medium">
+                        Diskusikan dan jawab 5 pertanyaan analisis masalah di bawah ini secara cermat bersama anggota kelompok kamu untuk menyelesaikan Paspor Misi Informatika.
+                    </p>
+                </div>
+
+                <!-- 5 Exit Ticket Questions -->
+                <div style="background-color: #F3EDE4; border-color: #D9DEE5;" class="p-5 rounded-xl border shadow-sm space-y-5">
+                    <h4 style="color: #1F2A44;" class="font-bold text-sm border-b border-slate-300 pb-2 flex items-center justify-between">
+                        <span>📝 Lembar Jawaban Exit Ticket Kelompok</span>
+                        <span style="background-color: #D9DEE5; color: #1F2A44;" class="text-xs px-2.5 py-0.5 rounded font-bold">5 Pertanyaan Analisis</span>
+                    </h4>
+
+                    <!-- Question 1 -->
+                    <div class="space-y-1.5">
+                        <label for="ansQ1" class="block text-xs font-bold text-slate-900">
+                            1. Sebutkan nama aplikasi yang tepat untuk menyusun laporan berbentuk dokumen teks!
+                        </label>
+                        <textarea id="ansQ1" rows="2" oninput="saveCurrentGroupSession()" placeholder="Tuliskan nama aplikasi perkantoran yang tepat beserta alasannya..." class="w-full text-xs p-2.5 border border-slate-300 rounded focus:ring-2 focus:ring-[#1F2A44] focus:outline-none"></textarea>
+                    </div>
+
+                    <!-- Question 2 -->
+                    <div class="space-y-1.5">
+                        <label for="ansQ2" class="block text-xs font-bold text-slate-900">
+                            2. Jelaskan fungsi rumus SUM dan AVERAGE pada aplikasi pengolah lembar kerja!
+                        </label>
+                        <textarea id="ansQ2" rows="2" oninput="saveCurrentGroupSession()" placeholder="Jelaskan masing-masing fungsi rumus SUM dan AVERAGE secara mendalam..." class="w-full text-xs p-2.5 border border-slate-300 rounded focus:ring-2 focus:ring-[#1F2A44] focus:outline-none"></textarea>
+                    </div>
+
+                    <!-- Question 3 -->
+                    <div class="space-y-1.5">
+                        <label for="ansQ3" class="block text-xs font-bold text-slate-900">
+                            3. Sebutkan minimal dua fitur pada aplikasi pembuat presentasi yang telah kamu coba hari ini!
+                        </label>
+                        <textarea id="ansQ3" rows="2" oninput="saveCurrentGroupSession()" placeholder="Sebutkan 2 fitur (misal: Slide Layout, Transitions, dll) dan kegunaannya..." class="w-full text-xs p-2.5 border border-slate-300 rounded focus:ring-2 focus:ring-[#1F2A44] focus:outline-none"></textarea>
+                    </div>
+
+                    <!-- Question 4 -->
+                    <div class="space-y-1.5">
+                        <label for="ansQ4" class="block text-xs font-bold text-slate-900">
+                            4. Mengapa sebuah laporan yang memuat data dan grafik biasanya memerlukan lebih dari satu aplikasi office?
+                        </label>
+                        <textarea id="ansQ4" rows="2" oninput="saveCurrentGroupSession()" placeholder="Jelaskan hubungan keterkaitan antara Word, Excel, dan PowerPoint..." class="w-full text-xs p-2.5 border border-slate-300 rounded focus:ring-2 focus:ring-[#1F2A44] focus:outline-none"></textarea>
+                    </div>
+
+                    <!-- Question 5 -->
+                    <div class="space-y-1.5">
+                        <label for="ansQ5" class="block text-xs font-bold text-slate-900">
+                            5. Menurutmu, apa tantangan yang mungkin muncul jika ketiga aplikasi tersebut digunakan bersamaan untuk satu pekerjaan?
+                        </label>
+                        <textarea id="ansQ5" rows="2" oninput="saveCurrentGroupSession()" placeholder="Jelaskan tantangan seperti konsistensi format, penyelarasan data, dll..." class="w-full text-xs p-2.5 border border-slate-300 rounded focus:ring-2 focus:ring-[#1F2A44] focus:outline-none"></textarea>
+                    </div>
+                </div>
+
+                <!-- Submit Final Assessment Button -->
+                <div style="background-color: #F3EDE4; border-color: #D9DEE5;" class="p-5 rounded-xl border shadow-sm text-center space-y-3">
+                    <h4 style="color: #1F2A44;" class="font-bold text-sm">Siap Memfinalisasi Paspor Misi Informatika?</h4>
+                    <p class="text-xs text-[#2F343B] max-w-lg mx-auto font-medium">Pastikan ketiga stasiun telah diklaim stempelnya dan kelima pertanyaan Exit Ticket telah diisi dengan lengkap.</p>
+                    <button type="button" onclick="claimStamp('analisis')" id="btnStampFinal" style="background-color: #1F2A44; color: #FFFFFF;" class="font-bold text-sm px-8 py-3 rounded-xl shadow-lg transition transform hover:-translate-y-0.5 hover:opacity-90">
+                        🎓 Selesaikan Misi & Klaim Stempel Exit Ticket
+                    </button>
+                </div>
+            </section>
+
+            <!-- DIGITAL PASSPORT SUMMARY & VERIFICATION CARD -->
+            <section style="background-color: #F3EDE4; border-color: #1F2A44;" class="rounded-xl border-2 p-6 shadow-md space-y-6">
+                <div class="flex flex-col sm:flex-row items-center justify-between border-b border-slate-300 pb-4 gap-4">
+                    <div class="flex items-center gap-3">
+                        <div style="background-color: #1F2A44; color: #FFFFFF;" class="w-12 h-12 rounded-full flex items-center justify-center text-2xl shadow font-bold">
+                            🛂
+                        </div>
+                        <div>
+                            <h3 style="color: #1F2A44;" class="font-bold text-lg">LEMBAR VERIFIKASI PASPOR DIGITAL</h3>
+                            <p class="text-xs text-[#2F343B]">Bukti Kelulusan Misi Informatika • SMA Kartika XIX-1 Bandung</p>
+                        </div>
+                    </div>
+                    <div class="text-right flex flex-col items-end">
+                        <span class="text-xs font-semibold text-[#2F343B] block">Status Akreditasi:</span>
+                        <span id="finalPassportStatus" class="inline-block bg-slate-200 text-slate-800 font-bold text-xs px-3 py-1 rounded-full mt-1">Belum Lengkap</span>
+                    </div>
+                </div>
+
+                <!-- Stamps Grid -->
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                    <div id="stampBox1" class="stamp-badge border-2 border-dashed border-slate-400 rounded-xl p-4 text-center bg-white flex flex-col items-center justify-center h-32">
+                        <div class="text-3xl opacity-30" id="stampIcon1">📝</div>
+                        <div class="font-bold text-xs text-slate-600 mt-2" id="stampTitle1">Stasiun 1 Word</div>
+                        <div class="text-[10px] text-slate-500 font-mono mt-0.5" id="stampStatus1">BELUM VERIFIKASI</div>
+                    </div>
+
+                    <div id="stampBox2" class="stamp-badge border-2 border-dashed border-slate-400 rounded-xl p-4 text-center bg-white flex flex-col items-center justify-center h-32">
+                        <div class="text-3xl opacity-30" id="stampIcon2">📊</div>
+                        <div class="font-bold text-xs text-slate-600 mt-2" id="stampTitle2">Stasiun 2 Excel</div>
+                        <div class="text-[10px] text-slate-500 font-mono mt-0.5" id="stampStatus2">BELUM VERIFIKASI</div>
+                    </div>
+
+                    <div id="stampBox3" class="stamp-badge border-2 border-dashed border-slate-400 rounded-xl p-4 text-center bg-white flex flex-col items-center justify-center h-32">
+                        <div class="text-3xl opacity-30" id="stampIcon3">💻</div>
+                        <div class="font-bold text-xs text-slate-600 mt-2" id="stampTitle3">Stasiun 3 PPT</div>
+                        <div class="text-[10px] text-slate-500 font-mono mt-0.5" id="stampStatus3">BELUM VERIFIKASI</div>
+                    </div>
+
+                    <div id="stampBox4" class="stamp-badge border-2 border-dashed border-slate-400 rounded-xl p-4 text-center bg-white flex flex-col items-center justify-center h-32">
+                        <div class="text-3xl opacity-30" id="stampIcon4">🎟️</div>
+                        <div class="font-bold text-xs text-slate-600 mt-2" id="stampTitle4">Exit Ticket</div>
+                        <div class="text-[10px] text-slate-500 font-mono mt-0.5" id="stampStatus4">BELUM VERIFIKASI</div>
+                    </div>
+                </div>
+
+                <!-- Send to Teacher Dashboard Actions & Badge / Certificate Banner -->
+                <div class="space-y-4">
+                    <!-- Certificate Unlock Trigger Banner (Visible when completed) -->
+                    <div id="certUnlockedBanner" style="background-color: #1F2A44; color: #FFFFFF;" class="hidden rounded-xl p-4 shadow-lg flex flex-col sm:flex-row items-center justify-between gap-4 animate-bounce-subtle border border-[#7C9A8E]">
+                        <div class="flex items-center gap-3">
+                            <span class="text-4xl">🏆</span>
+                            <div>
+                                <h4 class="font-bold text-base text-white">SELAMAT! SERTIFIKAT KETERAMPILAN TERBUKA</h4>
+                                <p class="text-xs text-[#D9DEE5]">Kelompok kamu telah menyelesaikan 3 stasiun & Exit Ticket. Cetak Sertifikat Keterampilan Digital sekarang!</p>
+                            </div>
+                        </div>
+                        <button type="button" onclick="openCertificateModal()" style="background-color: #7C9A8E; color: #1F2A44;" class="font-extrabold text-xs px-5 py-2.5 rounded-lg shadow transition transform hover:scale-105 flex items-center gap-2">
+                            <span>📜 Unduh Sertifikat Kelompok</span>
+                        </button>
+                    </div>
+
+                    <div class="pt-4 border-t border-slate-300 flex flex-col sm:flex-row items-center justify-between gap-3 bg-white p-4 rounded-xl border">
+                        <div>
+                            <div style="color: #1F2A44;" class="font-bold text-xs">📤 Kirim Hasil ke Dasbor Guru</div>
+                            <p class="text-[11px] text-[#2F343B] font-medium">Simpan hasil ke Dasbor lokal komputer ini atau salin kode JSON untuk dikirimkan ke Guru.</p>
+                        </div>
+                        <div class="flex gap-2">
+                            <button type="button" onclick="submitToTeacherDashboard()" style="background-color: #1F2A44; color: #FFFFFF;" class="font-bold text-xs px-4 py-2 rounded-lg shadow transition hover:opacity-90">
+                                💾 Simpan Ke Dasbor Guru
+                            </button>
+                            <button type="button" onclick="exportGroupJSON()" style="background-color: #2F343B; color: white;" class="font-bold text-xs px-3 py-2 rounded-lg shadow transition hover:opacity-90">
+                                📋 Unduh Kode JSON
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+
+        <!-- ================= MODE GURU (DASBOR) ================= -->
+        <div id="view-guru" class="hidden space-y-6">
+
+            <!-- Teacher Lock/Unlock Banner -->
+            <section style="background-color: #1F2A44;" class="text-white rounded-xl p-5 shadow-md flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div>
+                    <div style="background-color: #7C9A8E; color: #1F2A44;" class="text-xs px-3 py-1 rounded-full font-bold mb-2 inline-block">
+                        <span>🔒 PANEL REKAPITULASI GURU</span>
+                    </div>
+                    <h2 class="text-xl font-bold">Dasbor Pemantauan Paspor Misi Informatika</h2>
+                    <p class="text-xs text-[#D9DEE5] mt-1">Rekapitulasi ketercapaian 4 stempel, jawaban Exit Ticket, dan cetak sertifikat kelompok.</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button type="button" onclick="exportTeacherCSV()" class="bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs px-4 py-2.5 rounded-lg shadow transition flex items-center gap-1.5">
+                        <span>📥 Unduh Rekap CSV</span>
+                    </button>
+                    <button type="button" onclick="openImportModal()" style="background-color: #7C9A8E; color: #1F2A44;" class="font-bold text-xs px-4 py-2.5 rounded-lg shadow transition hover:opacity-90">
+                        ➕ Impor Data JSON
+                    </button>
+                </div>
+            </section>
+
+            <!-- Metrics Summary Cards -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div style="background-color: #F3EDE4; border-color: #D9DEE5;" class="p-4 rounded-xl border shadow-sm text-center">
+                    <span class="text-xs text-[#2F343B] uppercase font-bold tracking-wider">Total Kelompok Masuk</span>
+                    <div id="statTotalGroups" style="color: #1F2A44;" class="text-3xl font-extrabold mt-1">0</div>
+                </div>
+                <div style="background-color: #F3EDE4; border-color: #D9DEE5;" class="p-4 rounded-xl border shadow-sm text-center">
+                    <span class="text-xs text-[#2F343B] uppercase font-bold tracking-wider">Kelompok Selesai (4 Stempel)</span>
+                    <div id="statCompletedGroups" class="text-3xl font-extrabold text-emerald-800 mt-1">0</div>
+                </div>
+                <div style="background-color: #F3EDE4; border-color: #D9DEE5;" class="p-4 rounded-xl border shadow-sm text-center">
+                    <span class="text-xs text-[#2F343B] uppercase font-bold tracking-wider">Rata-Rata Ketercapaian Misi</span>
+                    <div id="statAvgProgress" style="color: #1F2A44;" class="text-3xl font-extrabold mt-1">0%</div>
+                </div>
+            </div>
+
+            <!-- Table of Submissions -->
+            <div style="background-color: #F3EDE4; border-color: #D9DEE5;" class="rounded-xl border shadow-sm overflow-hidden">
+                <div style="background-color: #D9DEE5;" class="p-4 border-b border-slate-300 flex flex-col sm:flex-row justify-between items-center gap-3">
+                    <h3 style="color: #1F2A44;" class="font-bold text-sm">📋 Daftar Paspor Misi Kelompok Murid</h3>
+                    <div class="flex items-center gap-2">
+                        <input type="text" id="teacherSearchInput" oninput="renderTeacherTable()" placeholder="Cari nama kelompok..." class="text-xs px-3 py-1.5 border border-slate-300 rounded focus:outline-none focus:ring-1 focus:ring-[#1F2A44]">
+                        <button type="button" onclick="clearAllTeacherData()" class="text-xs text-rose-800 hover:text-rose-950 font-semibold px-2 py-1">Hapus Semua Data</button>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto bg-white">
+                    <table class="w-full text-xs text-left border-collapse">
+                        <thead style="background-color: #1F2A44; color: #FFFFFF;" class="font-bold uppercase tracking-wider text-[10px]">
+                            <tr>
+                                <th class="p-3 border-b border-slate-600">Nama Kelompok</th>
+                                <th class="p-3 border-b border-slate-600">Anggota Tim</th>
+                                <th class="p-3 border-b border-slate-600 text-center">Stempel (W/E/P/ET)</th>
+                                <th class="p-3 border-b border-slate-600 text-center">Status Misi</th>
+                                <th class="p-3 border-b border-slate-600 text-center">Aksi Kelompok</th>
+                            </tr>
+                        </thead>
+                        <tbody id="teacherTableBody" class="divide-y divide-slate-200">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Detail Modal View for Selected Group -->
+            <div id="groupDetailModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                <div style="background-color: #F3EDE4;" class="rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto p-6 space-y-4 shadow-2xl border border-slate-300">
+                    <div class="flex justify-between items-start border-b border-slate-300 pb-3">
+                        <div>
+                            <h3 id="mGroupName" style="color: #1F2A44;" class="font-extrabold text-lg"></h3>
+                            <p id="mGroupMembers" class="text-xs text-[#2F343B] font-medium"></p>
+                        </div>
+                        <button type="button" onclick="closeDetailModal()" class="text-slate-600 hover:text-slate-900 font-bold text-lg">✕</button>
+                    </div>
+
+                    <!-- 5 Answers Detail -->
+                    <div class="space-y-3 text-xs">
+                        <h4 style="color: #1F2A44;" class="font-bold border-b border-slate-300 pb-1">Jawaban Exit Ticket Kelompok:</h4>
+                        
+                        <div class="bg-white p-3 rounded-lg border border-slate-300">
+                            <span style="color: #1F2A44;" class="font-bold block">1. Aplikasi Laporan Dokumen Teks:</span>
+                            <p id="mAnsQ1" class="text-slate-800 mt-1 whitespace-pre-wrap font-medium"></p>
+                        </div>
+                        <div class="bg-white p-3 rounded-lg border border-slate-300">
+                            <span style="color: #1F2A44;" class="font-bold block">2. Fungsi Rumus SUM & AVERAGE:</span>
+                            <p id="mAnsQ2" class="text-slate-800 mt-1 whitespace-pre-wrap font-medium"></p>
+                        </div>
+                        <div class="bg-white p-3 rounded-lg border border-slate-300">
+                            <span style="color: #1F2A44;" class="font-bold block">3. Minimal Dua Fitur Presentasi:</span>
+                            <p id="mAnsQ3" class="text-slate-800 mt-1 whitespace-pre-wrap font-medium"></p>
+                        </div>
+                        <div class="bg-white p-3 rounded-lg border border-slate-300">
+                            <span style="color: #1F2A44;" class="font-bold block">4. Alasan Menggunakan Lebih dari Satu Aplikasi Office:</span>
+                            <p id="mAnsQ4" class="text-slate-800 mt-1 whitespace-pre-wrap font-medium"></p>
+                        </div>
+                        <div class="bg-white p-3 rounded-lg border border-slate-300">
+                            <span style="color: #1F2A44;" class="font-bold block">5. Tantangan Penggunaan Bersamaan:</span>
+                            <p id="mAnsQ5" class="text-slate-800 mt-1 whitespace-pre-wrap font-medium"></p>
+                        </div>
+                    </div>
+
+                    <div class="pt-3 border-t border-slate-300 flex justify-between items-center">
+                        <button type="button" id="mBtnCert" onclick="" style="background-color: #1F2A44; color: #FFFFFF;" class="font-extrabold text-xs px-4 py-2 rounded-lg shadow transition flex items-center gap-1.5 hover:opacity-90">
+                            <span>📜 Unduh Sertifikat Kelompok Ini</span>
+                        </button>
+                        <button type="button" onclick="closeDetailModal()" style="background-color: #2F343B; color: white;" class="font-bold text-xs px-4 py-2 rounded-lg">Tutup Detail</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- JSON Import Modal -->
+            <div id="jsonImportModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                <div style="background-color: #F3EDE4;" class="rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-2xl border border-slate-300">
+                    <h3 style="color: #1F2A44;" class="font-bold text-base">➕ Impor Data JSON Paspor Kelompok</h3>
+                    <p class="text-xs text-[#2F343B]">Tempelkan kode JSON hasil unduhan kelompok Murid ke dalam kotak di bawah ini:</p>
+                    <textarea id="jsonInputText" rows="6" placeholder='{"groupName": "Kelompok A", ...}' class="w-full text-xs font-mono p-3 border border-slate-300 rounded focus:ring-2 focus:ring-[#1F2A44]"></textarea>
+                    <div class="flex justify-end gap-2">
+                        <button type="button" onclick="closeImportModal()" class="bg-slate-300 text-slate-800 font-bold text-xs px-4 py-2 rounded-lg">Batal</button>
+                        <button type="button" onclick="processJSONImport()" style="background-color: #1F2A44; color: #FFFFFF;" class="font-bold text-xs px-4 py-2 rounded-lg">Proses Impor</button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- CERTIFICATE & BADGE CELEBRATION MODAL -->
+    <div id="certificateModal" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-4 overflow-y-auto">
+        <div style="background-color: #F3EDE4;" class="rounded-2xl max-w-3xl w-full p-6 space-y-5 shadow-2xl my-8 relative border-4 border-[#1F2A44]">
+            <button type="button" onclick="closeCertificateModal()" class="absolute top-4 right-4 text-slate-600 hover:text-slate-900 font-bold text-xl">✕</button>
+
+            <div class="text-center space-y-2">
+                <div style="background-color: #1F2A44; color: #FFFFFF;" class="text-xs px-3 py-1 rounded-full font-bold uppercase tracking-wider inline-block">
+                    🎖️ Lencana Kelulusan Misi Informatika
+                </div>
+                <h3 style="color: #1F2A44;" class="text-2xl font-extrabold">SERTIFIKAT KETERAMPILAN DIGITAL</h3>
+                <p class="text-xs text-[#2F343B] font-semibold">SMA Kartika XIX-1 Bandung • Aplikasi Perkantoran Fase E</p>
+            </div>
+
+            <div class="border border-slate-300 rounded-xl overflow-hidden bg-white flex justify-center p-2 shadow-inner">
+                <canvas id="certificateCanvas" class="max-w-full h-auto rounded shadow-md"></canvas>
+            </div>
+
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2">
+                <div class="text-xs text-[#2F343B] font-medium flex items-center gap-1.5">
+                    <span> Format Gambar: <strong class="text-slate-900">PNG Resolusi Tinggi A4 (1200x850)</strong></span>
+                </div>
+                <div class="flex gap-2 w-full sm:w-auto">
+                    <button type="button" onclick="closeCertificateModal()" class="w-1/2 sm:w-auto bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold text-xs px-4 py-2.5 rounded-xl transition">
+                        Tutup
+                    </button>
+                    <button type="button" onclick="downloadCertificatePNG()" style="background-color: #1F2A44; color: #FFFFFF;" class="w-1/2 sm:w-auto font-extrabold text-xs px-6 py-2.5 rounded-xl shadow-lg transition transform hover:-translate-y-0.5 flex items-center justify-center gap-2 hover:opacity-90">
+                        <span>📥 Unduh Gambar Sertifikat (PNG)</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer style="background-color: #2F343B;" class="text-white text-xs py-6 mt-10 border-t border-slate-700">
+        <div class="max-w-6xl mx-auto px-4 flex flex-col sm:flex-row justify-between items-center gap-3">
+            <div>
+                <span class="font-bold text-white">Paspor Misi Informatika Kelas X</span> • SMA Kartika XIX-1 Bandung
+            </div>
+            <div>
+                Pembelajaran Interaktif Aplikasi Perkantoran (Fase E Kurikulum Merdeka)
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzt4jb5kvIdxDRxNMsgDiF4xkXuKJu-TXpEzA9cmyKFkzsdtaC1lViUdnfsj2StZNwz/exec";
+        const REALTIME_INTERVAL_MS = 3000;
+        const CLIENT_EPOCH_KEY = "paspor_server_epoch";
+        let realtimeRequestInFlight = false;
+        let lastRealtimeSignature = "";
+        let serverEpoch = null;
+        let currentGroupId = null;
+        let currentGroupNameKey = "";
+        let pendingServerWrites = new Set();
+
+        function safeJsonParse(value, fallback) {
+            try {
+                const parsed = JSON.parse(value);
+                return parsed ?? fallback;
+            } catch (_) {
+                return fallback;
+            }
+        }
+
+        function makeStableGroupId(groupName) {
+            const text = String(groupName || "").trim().replace(/\s+/g, " ").toLowerCase();
+            let hash = 2166136261;
+            for (let i = 0; i < text.length; i++) {
+                hash ^= text.charCodeAt(i);
+                hash = Math.imul(hash, 16777619);
+            }
+            return "grp_" + (hash >>> 0).toString(16).padStart(8, "0");
+        }
+
+        function normalizeGroupNameKey(groupName) {
+            return String(groupName || "").trim().replace(/\s+/g, " ").toLowerCase();
+        }
+
+        function getOrCreateCurrentGroupId(groupName) {
+            const name = String(groupName || "").trim();
+            const nameKey = normalizeGroupNameKey(name);
+
+            if (!name) {
+                currentGroupId = "grp_unnamed";
+                currentGroupNameKey = "";
+                return currentGroupId;
+            }
+
+            if (currentGroupId && currentGroupNameKey === nameKey) {
+                return currentGroupId;
+            }
+
+            currentGroupNameKey = nameKey;
+            const saved = safeJsonParse(localStorage.getItem("paspor_current_session") || "null", null);
+
+            if (saved?.id && saved?.groupName && normalizeGroupNameKey(saved.groupName) === nameKey) {
+                currentGroupId = String(saved.id);
+            } else {
+                currentGroupId = makeStableGroupId(name);
+            }
+            return currentGroupId;
+        }
+
+        function normalizeServerGroup(item) {
+            const groupName = String(item?.groupName || "Kelompok Tanpa Nama").trim();
+            return {
+                id: String(item?.id || makeStableGroupId(groupName)),
+                groupName: groupName || "Kelompok Tanpa Nama",
+                groupMembers: String(item?.groupMembers || "Anggota Belum Diisi"),
+                stamps: (item?.stamps && typeof item.stamps === "object") ? item.stamps : {},
+                ansQ1: String(item?.ansQ1 ?? ""),
+                ansQ2: String(item?.ansQ2 ?? ""),
+                ansQ3: String(item?.ansQ3 ?? ""),
+                ansQ4: String(item?.ansQ4 ?? ""),
+                ansQ5: String(item?.ansQ5 ?? ""),
+                timestamp: item?.timestamp || ""
+            };
+        }
+
+        function getTeacherDatabase() {
+            return safeJsonParse(localStorage.getItem("paspor_teacher_db") || "[]", []).filter(item => item && typeof item === "object");
+        }
+
+        function saveTeacherDatabase(db) {
+            localStorage.setItem("paspor_teacher_db", JSON.stringify(db));
+        }
+
+        function upsertLocalTeacherRecord(payload) {
+            const db = getTeacherDatabase();
+            const id = String(payload.id || "");
+            const idx = db.findIndex(item => String(item?.id || "") === id);
+
+            if (idx >= 0) db[idx] = { ...db[idx], ...payload };
+            else db.push(payload);
+
+            saveTeacherDatabase(db);
+            renderTeacherTable();
+        }
+
+        async function postToServer(payload) {
+            return await fetch(WEB_APP_URL, {
+                method: "POST",
+                mode: "no-cors",
+                cache: "no-store",
+                credentials: "omit",
+                headers: { "Content-Type": "text/plain;charset=utf-8" },
+                body: JSON.stringify(payload)
+            });
+        }
+
+        async function syncTeacherDatabaseFromServer(options = {}) {
+            if (realtimeRequestInFlight) return { ok: false, busy: true };
+            realtimeRequestInFlight = true;
+
+            try {
+                const url = WEB_APP_URL + "?action=read&t=" + Date.now();
+                const response = await fetch(url, {
+                    method: "GET",
+                    cache: "no-store",
+                    credentials: "omit"
+                });
+                if (!response.ok) throw new Error("HTTP " + response.status);
+
+                const rawText = await response.text();
+                const envelope = safeJsonParse(rawText, null);
+                if (!envelope || !Array.isArray(envelope.data)) {
+                    throw new Error("Respons Apps Script tidak sesuai format realtime baru.");
+                }
+
+                const normalized = envelope.data.map(normalizeServerGroup);
+                const incomingEpoch = Number(envelope.epoch || 1);
+                const previousEpoch = serverEpoch;
+                const epochChanged = previousEpoch !== null && incomingEpoch !== previousEpoch;
+
+                serverEpoch = incomingEpoch;
+                try { localStorage.setItem(CLIENT_EPOCH_KEY, String(incomingEpoch)); } catch (_) {}
+
+                if (epochChanged) {
+                    // CLEAR_ALL di server adalah reset global. Semua state lokal lama
+                    // harus dibuang dan TIDAK boleh dipertahankan sebagai pending write.
+                    pendingServerWrites.clear();
+                    clearTimeout(autoSyncTimer);
+                    autoSyncTimer = null;
+                    clearLocalPassportStateAfterGlobalReset();
+                }
+
+                const signature = JSON.stringify(normalized);
+                const localData = getTeacherDatabase();
+                const serverIds = new Set(normalized.map(item => String(item.id)));
+
+                // Pending hanya boleh dipertahankan jika masih berada pada epoch server
+                // yang sama. Setelah epoch berubah, pending lama sudah tidak valid.
+                const pendingLocalOnly = !epochChanged ? localData.filter(item => {
+                    const id = String(item?.id || "");
+                    return id && pendingServerWrites.has(id) && !serverIds.has(id);
+                }) : [];
+
+                const effectiveDatabase = normalized.concat(pendingLocalOnly);
+
+                if (
+                    signature !== lastRealtimeSignature ||
+                    pendingLocalOnly.length > 0 ||
+                    epochChanged
+                ) {
+                    lastRealtimeSignature = signature;
+                    saveTeacherDatabase(effectiveDatabase);
+                    renderTeacherTable();
+                }
+
+                if (options.verifyId) {
+                    const found = normalized.find(item => String(item.id) === String(options.verifyId));
+                    if (found) return { ok: true, found, epoch: incomingEpoch };
+                    return { ok: false, found: null, count: normalized.length, epoch: incomingEpoch };
+                }
+
+                return { ok: true, count: normalized.length, data: normalized, epoch: incomingEpoch };
+            } catch (error) {
+                console.warn("[REALTIME] Sinkronisasi gagal:", error.message);
+                return { ok: false, error: error.message };
+            } finally {
+                realtimeRequestInFlight = false;
+            }
+        }
+
+        function clearLocalPassportStateAfterGlobalReset() {
+            try { localStorage.removeItem("paspor_teacher_db"); } catch (_) {}
+            try { localStorage.removeItem("paspor_current_session"); } catch (_) {}
+
+            currentGroupId = null;
+            currentGroupNameKey = "";
+
+            ['groupName', 'groupMembers', 'ansQ1', 'ansQ2', 'ansQ3', 'ansQ4', 'ansQ5'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.value = "";
+            });
+
+            appState.stamps = {
+                stasiun1: false,
+                stasiun2: false,
+                stasiun3: false,
+                analisis: false
+            };
+
+            ['stasiun1', 'stasiun2', 'stasiun3', 'analisis'].forEach(updateStampVisual);
+            updateTotalProgress();
+            renderTeacherTable();
+        }
+
+        async function waitForServerVerification(id, attempts = 6) {
+            let lastResult = null;
+            for (let attempt = 0; attempt < attempts; attempt++) {
+                await new Promise(resolve => setTimeout(resolve, 450 + attempt * 250));
+                lastResult = await syncTeacherDatabaseFromServer({ verifyId: id });
+                if (lastResult?.ok && lastResult.found) return lastResult;
+            }
+            return lastResult || { ok: false, error: "Verifikasi server gagal." };
+        }
+
+        async function sendPayloadToServer(payload, successMessage = "Data berhasil disimpan ke server.") {
+            const id = String(payload?.id || "");
+            if (id) pendingServerWrites.add(id);
+
+            const epochAtSend = serverEpoch ?? Number(localStorage.getItem(CLIENT_EPOCH_KEY) || 1);
+            const requestPayload = { ...payload, epoch: epochAtSend };
+
+            try {
+                await postToServer(requestPayload);
+                const verification = await waitForServerVerification(id);
+
+                if (!verification.ok || !verification.found) {
+                    if (verification?.stale) {
+                        pendingServerWrites.delete(id);
+                        await syncTeacherDatabaseFromServer();
+                        throw new Error("Data berasal dari epoch lama dan ditolak server setelah reset global.");
+                    }
+                    throw new Error("Data belum ditemukan di Google Sheets.");
+                }
+
+                if (id) pendingServerWrites.delete(id);
+                alert(successMessage);
+                return true;
+            } catch (error) {
+                console.error("[SERVER] Pengiriman gagal:", error);
+                if (id && serverEpoch === epochAtSend) {
+                    upsertLocalTeacherRecord(payload);
+                } else {
+                    pendingServerWrites.delete(id);
+                }
+                alert(
+                    error.message && error.message.includes("epoch lama")
+                        ? "Data lama dibatalkan karena server baru saja di-reset. Perangkat ini sudah disinkronkan."
+                        : "Data disimpan sementara di perangkat ini dan akan disinkronkan kembali."
+                );
+                return false;
+            }
+        }
+
+        function updateStampVisual(stationKey) {
+            const active = !!appState.stamps[stationKey];
+            const map = {
+                stasiun1: ["stampBox1", "stampIcon1", "stampTitle1", "stampStatus1", "📝", "border-[#1F2A44] bg-[#F3EDE4] text-[#1F2A44]"],
+                stasiun2: ["stampBox2", "stampIcon2", "stampTitle2", "stampStatus2", "📊", "border-[#7C9A8E] bg-[#F3EDE4] text-[#1F2A44]"],
+                stasiun3: ["stampBox3", "stampIcon3", "stampTitle3", "stampStatus3", "💻", "border-amber-700 bg-amber-50 text-amber-900"],
+                analisis: ["stampBox4", "stampIcon4", "stampTitle4", "stampStatus4", "🎟️", "border-purple-700 bg-purple-50 text-purple-900"]
+            };
+            const cfg = map[stationKey];
+            if (!cfg) return;
+
+            const [boxId, iconId, titleId, statusId, symbol, colorClass] = cfg;
+            const box = document.getElementById(boxId);
+            const icon = document.getElementById(iconId);
+            const title = document.getElementById(titleId);
+            const status = document.getElementById(statusId);
+            const navBadge = document.getElementById("badge-" + stationKey);
+
+            if (!box || !icon || !title || !status) return;
+
+            if (active) {
+                box.className = `stamp-badge border-2 rounded-xl p-4 text-center flex flex-col items-center justify-center h-32 active ${colorClass} shadow-md`;
+                icon.innerText = symbol;
+                icon.classList.remove("opacity-30");
+                title.classList.remove("text-slate-600");
+                title.classList.add("font-extrabold");
+                status.innerText = "VERIFIKASI RESMI ✓";
+                status.className = "text-[10px] font-bold font-mono mt-0.5 text-emerald-700";
+                if (navBadge) {
+                    navBadge.innerText = "VERIFIKASI ✓";
+                    navBadge.className = "text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold";
+                }
+            }
+        }
+
+        window.addEventListener("DOMContentLoaded", function() {
+            try {
+                const savedEpoch = Number(localStorage.getItem(CLIENT_EPOCH_KEY));
+                if (Number.isFinite(savedEpoch) && savedEpoch > 0) serverEpoch = savedEpoch;
+            } catch (_) {}
+            syncTeacherDatabaseFromServer();
+        });
+        setInterval(() => {
+            syncTeacherDatabaseFromServer();
+            syncPollDataFromServer();
+        }, REALTIME_INTERVAL_MS);
+
+        async function editGroupDataById(id) {
+            const db = getTeacherDatabase();
+            const group = db.find(item => String(item?.id) === String(id));
+            if (!group) return;
+
+            const newName = prompt("Edit Nama Kelompok:", group.groupName);
+            if (newName === null) return;
+            const cleanName = newName.trim();
+            if (!cleanName) {
+                alert("Nama kelompok tidak boleh kosong.");
+                return;
+            }
+
+            const newMembers = prompt("Edit Nama Anggota:", group.groupMembers);
+            if (newMembers === null) return;
+
+            const payload = {
+                action: "UPDATE",
+                id: group.id,
+                oldId: group.id,
+                oldGroupName: group.groupName,
+                groupName: cleanName,
+                groupMembers: newMembers.trim(),
+                stamps: group.stamps || {},
+                ansQ1: group.ansQ1 || "",
+                ansQ2: group.ansQ2 || "",
+                ansQ3: group.ansQ3 || "",
+                ansQ4: group.ansQ4 || "",
+                ansQ5: group.ansQ5 || ""
+            };
+
+            await sendPayloadToServer(payload, `Data kelompok "${cleanName}" berhasil diperbarui di Google Sheets.`);
+        }
+
+        // Global State Management
+        const appState = {
+            view: 'smartboard',
+            currentTab: 'stasiun1',
+            stamps: { stasiun1: false, stasiun2: false, stasiun3: false, analisis: false },
+            excelData: [
+                { name: 'Andi Pratama', grade: 85 },
+                { name: 'Budi Santoso', grade: 92 },
+                { name: 'Citra Dewi', grade: 78 },
+                { name: 'Deni Kurniawan', grade: 88 },
+                { name: 'Eka Putri', grade: 95 }
+            ],
+            pollLevel: 1,
+            pollActiveQuestion: 0,
+            pollVotes: {
+                level1: [0, 0, 0],
+                level2_q1: [0, 0, 0],
+                level2_q2: [0, 0, 0],
+                level2_q3: [0, 0, 0]
+            },
+            chartInstance: null,
+            pollChartInstance: null,
+            activeCertData: null
+        };
+
+        let timerInterval = null;
+        let timeLeft = 16 * 60;
+
+        function resetCurrentGroupFormOnLoad() {
+            try {
+                localStorage.removeItem("paspor_current_session");
+            } catch (_) {}
+            currentGroupId = null;
+            currentGroupNameKey = "";
+            pendingServerWrites.clear();
+
+            ['groupName', 'groupMembers', 'ansQ1', 'ansQ2', 'ansQ3', 'ansQ4', 'ansQ5'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.value = "";
+            });
+
+            appState.stamps = { stasiun1: false, stasiun2: false, stasiun3: false, analisis: false };
+            ['stasiun1', 'stasiun2', 'stasiun3', 'analisis'].forEach(updateStampVisual);
+            updateTotalProgress();
+        }
+
+        window.addEventListener('load', function() {
+            resetCurrentGroupFormOnLoad();
+            switchMainView('smartboard');
+            updateWordPreview();
+            renderExcelTable();
+            initExcelChart();
+            initPollChart();
+            switchPollLevel(1);
+            showSlide(1);
+            switchTab('stasiun1');
+            showReflectCard(1);
+            renderTeacherTable();
+            syncTeacherDatabaseFromServer();
+        });
+
+        function openGuruPinModal() {
+            const modal = document.getElementById('guruPinModal');
+            const input = document.getElementById('guruPinInput');
+            if (!modal || !input) return;
+            input.value = '';
+            modal.classList.add('show');
+            setTimeout(() => input.focus(), 50);
+        }
+
+        function closeGuruPinModal() {
+            const modal = document.getElementById('guruPinModal');
+            const input = document.getElementById('guruPinInput');
+            if (input) input.value = '';
+            if (modal) modal.classList.remove('show');
+        }
+
+        function verifyGuruPin() {
+            const input = document.getElementById('guruPinInput');
+            const pin = input ? input.value : '';
+            if (pin !== "1234") {
+                alert("PIN Akses Salah! Akses Dasbor Guru Ditolak.");
+                if (input) { input.value = ''; input.focus(); }
+                return;
+            }
+            closeGuruPinModal();
+            switchMainView('guru', true);
+        }
+
+        document.addEventListener('keydown', function(event) {
+            const modal = document.getElementById('guruPinModal');
+            if (!modal || !modal.classList.contains('show')) return;
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                verifyGuruPin();
+            } else if (event.key === 'Escape') {
+                event.preventDefault();
+                closeGuruPinModal();
+            }
+        });
+
+        function switchMainView(targetView, pinVerified = false) {
+            if (targetView === 'guru' && !pinVerified) {
+                openGuruPinModal();
+                return;
+            }
+
+            appState.view = targetView;
+            const viewSmartboard = document.getElementById('view-smartboard');
+            const viewMurid = document.getElementById('view-Murid');
+            const viewGuru = document.getElementById('view-guru');
+            
+            const btnSmartboard = document.getElementById('btnViewSmartboard');
+            const btnMurid = document.getElementById('btnViewMurid');
+            const btnGuru = document.getElementById('btnViewGuru');
+            const headerProgress = document.getElementById('headerProgress');
+
+            viewSmartboard.classList.add('hidden');
+            viewMurid.classList.add('hidden');
+            viewGuru.classList.add('hidden');
+
+            btnSmartboard.className = "px-3 py-1.5 rounded-lg font-bold text-white hover:text-slate-200 flex items-center gap-1.5 transition";
+            btnMurid.className = "px-3 py-1.5 rounded-lg font-bold text-white hover:text-slate-200 flex items-center gap-1.5 transition";
+            btnGuru.className = "px-3 py-1.5 rounded-lg font-bold text-white hover:text-slate-200 flex items-center gap-1.5 transition";
+
+            if (targetView === 'smartboard') {
+                viewSmartboard.classList.remove('hidden');
+                btnSmartboard.className = "px-3 py-1.5 rounded-lg font-bold bg-[#7C9A8E] text-[#1F2A44] shadow flex items-center gap-1.5 transition";
+                if (headerProgress) headerProgress.classList.add('hidden');
+                if (appState.pollChartInstance) setTimeout(() => appState.pollChartInstance.resize(), 150);
+            } else if (targetView === 'guru') {
+                viewGuru.classList.remove('hidden');
+                btnGuru.className = "px-3 py-1.5 rounded-lg font-bold bg-[#7C9A8E] text-[#1F2A44] shadow flex items-center gap-1.5 transition";
+                if (headerProgress) headerProgress.classList.add('hidden');
+                renderTeacherTable();
+            } else {
+                viewMurid.classList.remove('hidden');
+                btnMurid.className = "px-3 py-1.5 rounded-lg font-bold bg-[#7C9A8E] text-[#1F2A44] shadow flex items-center gap-1.5 transition";
+                if (headerProgress) headerProgress.classList.remove('hidden');
+            }
+        }
+
+        function switchSmartboardTab(tabKey) {
+            ['polling', 'timer', 'refleksi'].forEach(k => {
+                const sec = document.getElementById('sbContent-' + k);
+                const btn = document.getElementById('sbTabBtn-' + k);
+                if (sec) sec.classList.add('hidden');
+                if (btn) {
+                    btn.style.backgroundColor = '#D9DEE5';
+                    btn.style.color = '#2F343B';
+                    btn.className = "px-4 py-2 rounded-lg text-xs font-bold hover:bg-slate-300 flex items-center gap-2 transition";
+                }
+            });
+
+            const activeSec = document.getElementById('sbContent-' + tabKey);
+            const activeBtn = document.getElementById('sbTabBtn-' + tabKey);
+            if (activeSec) activeSec.classList.remove('hidden');
+            if (activeBtn) {
+                activeBtn.style.backgroundColor = '#1F2A44';
+                activeBtn.style.color = '#FFFFFF';
+                activeBtn.className = "px-4 py-2 rounded-lg text-xs font-bold shadow flex items-center gap-2 transition";
+            }
+
+            if (tabKey === 'polling' && appState.pollChartInstance) {
+                setTimeout(() => appState.pollChartInstance.resize(), 150);
+            }
+        }
+
+        const pollDataStore = {
+            level1: {
+                title: "Seberapa Sering Kamu Menggunakan Aplikasi Office?",
+                badge: "Polling Level 1 (Frekuensi)",
+                labels: ['Jarang / Belum', 'Pernah (Word Dasar)', 'Sering & Mahir'],
+                options: [
+                    { title: "1. Belum Pernah / Jarang Sekali", desc: "Baru pertama kali mencoba aplikasi perkantoran" },
+                    { title: "2. Pernah (Hanya Word / Pengetikan Dasar)", desc: "Pernah mengetik tugas sekolah sederhana" },
+                    { title: "3. Sering & Mahir (Word, Excel, PPT)", desc: "Terbiasa membuat tabel, rumus, & presentasi" }
+                ],
+                key: 'level1'
+            },
+            level2_q1: {
+                title: "Aplikasi manakah yang paling tepat digunakan untuk menyusun surat resmi?",
+                badge: "Polling Level 2 (Soal 1)",
+                labels: ['Microsoft Word', 'Microsoft Excel', 'Microsoft PowerPoint'],
+                options: [
+                    { title: "A. Microsoft Word", desc: "Aplikasi pengolah kata untuk dokumen teks resmi" },
+                    { title: "B. Microsoft Excel", desc: "Aplikasi pengolah angka & tabel" },
+                    { title: "C. Microsoft PowerPoint", desc: "Aplikasi pembuat slide presentasi" }
+                ],
+                key: 'level2_q1'
+            },
+            level2_q2: {
+                title: "Aplikasi manakah yang paling tepat digunakan untuk mengolah data nilai satu kelas?",
+                badge: "Polling Level 2 (Soal 2)",
+                labels: ['Microsoft Word', 'Microsoft Excel', 'Microsoft PowerPoint'],
+                options: [
+                    { title: "A. Microsoft Word", desc: "Aplikasi pengolah kata untuk dokumen teks" },
+                    { title: "B. Microsoft Excel", desc: "Aplikasi pengolah angka & rumus matematika" },
+                    { title: "C. Microsoft PowerPoint", desc: "Aplikasi pembuat slide presentasi" }
+                ],
+                key: 'level2_q2'
+            },
+            level2_q3: {
+                title: "Pernahkah kamu membuat slide presentasi sebelumnya?",
+                badge: "Polling Level 2 (Soal 3)",
+                labels: ['Pernah (PowerPoint)', 'Pernah (Canva/G.Slide)', 'Belum Pernah'],
+                options: [
+                    { title: "A. Pernah, menggunakan PowerPoint", desc: "Sudah terbiasa memakai aplikasi PPT desktop" },
+                    { title: "B. Pernah, aplikasi lain (Canva/Google Slide)", desc: "Terbiasa memakai platform presentasi daring" },
+                    { title: "C. Belum pernah sama sekali", desc: "Baru akan mencoba di stasiun hari ini" }
+                ],
+                key: 'level2_q3'
+            }
+        };
+
+        let currentPollKey = 'level1';
+
+        function switchPollLevel(lvl) {
+            const btn1 = document.getElementById('pollLevelBtn1');
+            const btn2 = document.getElementById('pollLevelBtn2');
+
+            if (lvl === 1) {
+                btn1.style.backgroundColor = '#1F2A44';
+                btn1.style.color = '#FFFFFF';
+                btn2.style.backgroundColor = '#D9DEE5';
+                btn2.style.color = '#2F343B';
+                loadPoll('level1');
+            } else {
+                btn2.style.backgroundColor = '#1F2A44';
+                btn2.style.color = '#FFFFFF';
+                btn1.style.backgroundColor = '#D9DEE5';
+                btn1.style.color = '#2F343B';
+                loadPoll('level2_q1');
+            }
+        }
+
+        function loadPoll(key) {
+            currentPollKey = key;
+            const data = pollDataStore[key];
+
+            document.getElementById('pollCategoryBadge').innerText = data.badge;
+            document.getElementById('pollQuestionText').innerText = `"${data.title}"`;
+
+            let subNavHTML = '';
+            if (key.startsWith('level2')) {
+                subNavHTML = `
+                    <div class="flex gap-1.5 bg-white p-1 rounded-lg text-[11px] font-bold mb-3 border border-slate-300">
+                        <button type="button" onclick="loadPoll('level2_q1')" class="px-2.5 py-1 rounded ${key==='level2_q1'?'bg-[#1F2A44] text-white':'text-slate-800'}">Soal 1 (Word)</button>
+                        <button type="button" onclick="loadPoll('level2_q2')" class="px-2.5 py-1 rounded ${key==='level2_q2'?'bg-[#1F2A44] text-white':'text-slate-800'}">Soal 2 (Excel)</button>
+                        <button type="button" onclick="loadPoll('level2_q3')" class="px-2.5 py-1 rounded ${key==='level2_q3'?'bg-[#1F2A44] text-white':'text-slate-800'}">Soal 3 (PPT)</button>
+                    </div>
+                `;
+            }
+
+            const container = document.getElementById('pollOptionsContainer');
+            container.innerHTML = subNavHTML;
+
+            data.options.forEach((opt, idx) => {
+                const div = document.createElement('div');
+                div.className = "flex items-center justify-between p-3.5 bg-white border border-slate-300 rounded-xl shadow-sm";
+                div.innerHTML = `
+                    <div class="pr-2">
+                        <span class="font-bold text-xs text-slate-900 block">${opt.title}</span>
+                        <span class="text-[11px] text-[#2F343B] font-medium">${opt.desc}</span>
+                    </div>
+                    <button type="button" onclick="castVote('${key}', ${idx})" style="background-color: #1F2A44; color: #FFFFFF;" class="font-bold text-xs px-4 py-2.5 rounded-lg shadow whitespace-nowrap active:scale-95 transition hover:opacity-90">
+                        +1 Suara
+                    </button>
+                `;
+                container.appendChild(div);
+            });
+
+            updatePollChartConfig(data.labels, appState.pollVotes[key]);
+            updatePollStats();
+        }
+
+        function initPollChart() {
+            const canvas = document.getElementById('smartboardPollChart');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+
+            appState.pollChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: pollDataStore['level1'].labels,
+                    datasets: [{
+                        label: 'Jumlah Suara Murid',
+                        data: appState.pollVotes['level1'],
+                        backgroundColor: [
+                            'rgba(124, 154, 142, 0.9)',
+                            'rgba(31, 42, 68, 0.9)',
+                            'rgba(47, 52, 59, 0.9)'
+                        ],
+                        borderColor: [
+                            'rgb(124, 154, 142)',
+                            'rgb(31, 42, 68)',
+                            'rgb(47, 52, 59)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { beginAtZero: true, ticks: { stepSize: 1, font: { size: 10 } } },
+                        x: { ticks: { font: { size: 10, weight: 'bold' } } }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { callbacks: { label: (c) => ` ${c.parsed.y} Murid` } }
+                    }
+                }
+            });
+            updatePollStats();
+        }
+
+        function updatePollChartConfig(labels, dataValues) {
+            if (!appState.pollChartInstance) return;
+            appState.pollChartInstance.data.labels = labels;
+            appState.pollChartInstance.data.datasets[0].data = dataValues;
+            appState.pollChartInstance.update();
+        }
+
+        function updatePollStats() {
+            const currentVotes = appState.pollVotes[currentPollKey] || [];
+            const total = currentVotes.reduce((acc, curr) => acc + curr, 0);
+            const totalVotesEl = document.getElementById('totalVotesCount');
+            if (totalVotesEl) totalVotesEl.innerText = total;
+        }
+
+        function castVote(key, index) {
+            appState.pollVotes[key][index]++;
+            if (appState.pollChartInstance && currentPollKey === key) {
+                appState.pollChartInstance.data.datasets[0].data = [...appState.pollVotes[key]];
+                appState.pollChartInstance.update();
+            }
+            updatePollStats();
+            sendVoteToServer(key, index);
+        }
+
+        async function resetPollVotes() {
+            if (!confirm("Apakah Anda yakin ingin mereset semua hasil polling ini?")) return;
+            for (let key in appState.pollVotes) {
+                appState.pollVotes[key] = appState.pollVotes[key].map(() => 0);
+            }
+            if (appState.pollChartInstance && pollDataStore[currentPollKey]) {
+                updatePollChartConfig(pollDataStore[currentPollKey].labels, appState.pollVotes[currentPollKey]);
+            }
+            updatePollStats();
+
+            try {
+                const payload = { action: "UPDATE_POLL", votes: appState.pollVotes };
+                await postToServer(payload);
+                setTimeout(() => syncPollDataFromServer(), 500);
+            } catch (e) {
+                console.warn("Gagal mereset data di server:", e);
+            }
+        }
+
+        function applyCustomTimer() {
+            const minInput = document.getElementById('customMinutesInput');
+            const mins = parseInt(minInput.value) || 16;
+            pauseTimer();
+            timeLeft = mins * 60;
+            updateTimerDisplay();
+            alert(`⏱️ Durasi timer berhasil diatur ke ${mins} Menit.`);
+        }
+
+        function startTimer() {
+            if (timerInterval) return;
+            timerInterval = setInterval(() => {
+                if (timeLeft > 0) {
+                    timeLeft--;
+                    updateTimerDisplay();
+                } else {
+                    clearInterval(timerInterval);
+                    timerInterval = null;
+                    alert("Waktu rotasi stasiun selesai! Silakan berikan aba-aba transisi stasiun berikutnya.");
+                }
+            }, 1000);
+        }
+
+        function pauseTimer() {
+            clearInterval(timerInterval);
+            timerInterval = null;
+        }
+
+        function resetTimer() {
+            pauseTimer();
+            const minInput = document.getElementById('customMinutesInput');
+            const mins = parseInt(minInput.value) || 16;
+            timeLeft = mins * 60;
+            updateTimerDisplay();
+        }
+
+        function updateTimerDisplay() {
+            const min = Math.floor(timeLeft / 60);
+            const sec = timeLeft % 60;
+            const display = document.getElementById('timerDisplay');
+            if (display) {
+                display.innerText = `${min < 10 ? '0' : ''}${min}:${sec < 10 ? '0' : ''}${sec}`;
+            }
+        }
+
+        function showReflectCard(num) {
+            const card = document.getElementById('reflectionDisplayCard');
+            if (!card) return;
+
+            for (let i = 1; i <= 3; i++) {
+                const btn = document.getElementById('refBtn' + i);
+                if (btn) {
+                    btn.className = i === num 
+                        ? "p-5 rounded-2xl border-2 border-[#1F2A44] bg-white text-left shadow-md space-y-2" 
+                        : "p-5 rounded-2xl border border-slate-300 bg-white text-left shadow-sm hover:border-[#1F2A44] transition space-y-2";
+                }
+            }
+
+            if (num === 1) {
+                card.innerHTML = `
+                    <span class="text-xs text-[#1F2A44] font-extrabold uppercase tracking-wider">Pertanyaan Refleksi 1 dari 3</span>
+                    <h3 class="text-xl font-black text-[#1F2A44] mt-1">Aplikasi mana yang menurutmu paling mudah dipelajari hari ini? Mengapa?</h3>
+                    <p class="text-xs text-[#2F343B] mt-2 font-medium">Diskusikan dengan anggota tim dan tuliskan kesimpulannya di LKPD.</p>
+                `;
+            } else if (num === 2) {
+                card.innerHTML = `
+                    <span class="text-xs text-[#1F2A44] font-extrabold uppercase tracking-wider">Pertanyaan Refleksi 2 dari 3</span>
+                    <h3 class="text-xl font-black text-[#1F2A44] mt-1">Aplikasi mana yang masih terasa menantang? Bagian mana yang sulit?</h3>
+                    <p class="text-xs text-[#2F343B] mt-2 font-medium">Diskusikan dengan anggota tim dan tuliskan kesimpulannya di LKPD.</p>
+                `;
+            } else if (num === 3) {
+                card.innerHTML = `
+                    <span class="text-xs text-[#1F2A44] font-extrabold uppercase tracking-wider">Pertanyaan Refleksi 3 dari 3</span>
+                    <h3 class="text-xl font-black text-[#1F2A44] mt-1">Kapan sebaiknya kita menggunakan Word, Excel, atau PowerPoint dalam tugas sehari-hari?</h3>
+                    <p class="text-xs text-[#2F343B] mt-2 font-medium">Diskusikan dengan anggota tim dan tuliskan kesimpulannya di LKPD.</p>
+                `;
+            }
+        }
+
+        function switchTab(tabId) {
+            appState.currentTab = tabId;
+            const sections = document.querySelectorAll('.station-content');
+            sections.forEach(sec => sec.classList.add('hidden'));
+
+            const activeSection = document.getElementById('content-' + tabId);
+            if (activeSection) activeSection.classList.remove('hidden');
+
+            const allTabs = document.querySelectorAll('.tab-btn');
+            allTabs.forEach(btn => btn.classList.remove('ring-2', 'ring-[#1F2A44]', 'bg-white'));
+            
+            const allIndicators = document.querySelectorAll('[id^="indicator-"]');
+            allIndicators.forEach(ind => ind.classList.add('hidden'));
+
+            const activeBtn = document.getElementById('tab-' + tabId);
+            const activeInd = document.getElementById('indicator-' + tabId);
+            if (activeBtn) activeBtn.classList.add('ring-2', 'ring-[#1F2A44]', 'bg-white');
+            if (activeInd) activeInd.classList.remove('hidden');
+
+            if (tabId === 'stasiun2' && appState.chartInstance) {
+                setTimeout(() => appState.chartInstance.resize(), 150);
+            }
+        }
+
+        function updateWordPreview() {
+            const titleInput = document.getElementById('wTitle');
+            const p1Input = document.getElementById('wPara1');
+            const p2Input = document.getElementById('wPara2');
+
+            document.getElementById('prevTitle').innerText = titleInput ? titleInput.value : '';
+            document.getElementById('prevP1').innerText = p1Input ? p1Input.value : '';
+            document.getElementById('prevP2').innerText = p2Input ? p2Input.value : '';
+        }
+
+        function renderExcelTable() {
+            const tbody = document.getElementById('excelTableBody');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+
+            appState.excelData.forEach((item, index) => {
+                const tr = document.createElement('tr');
+                tr.className = index % 2 === 0 ? 'bg-white' : 'bg-slate-50';
+                tr.innerHTML = `
+                    <td class="p-2 text-center border-r border-slate-200 font-mono text-slate-500">${index + 1}</td>
+                    <td class="p-2 border-r border-slate-200">
+                        <input type="text" value="${item.name}" oninput="updateExcelData(${index}, 'name', this.value)" class="w-full text-xs p-1 border border-slate-300 rounded focus:ring-1 focus:ring-[#1F2A44]">
+                    </td>
+                    <td class="p-2 text-center">
+                        <input type="number" min="0" max="100" value="${item.grade}" oninput="updateExcelData(${index}, 'grade', this.value)" class="w-20 text-xs p-1 text-center font-mono border border-slate-300 rounded focus:ring-1 focus:ring-[#1F2A44]">
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+            recalculateExcelStats();
+        }
+
+        function updateExcelData(index, field, value) {
+            if (field === 'grade') {
+                appState.excelData[index].grade = parseFloat(value) || 0;
+            } else {
+                appState.excelData[index].name = value;
+            }
+            recalculateExcelStats();
+            updateChartData();
+        }
+
+        function recalculateExcelStats() {
+            const grades = appState.excelData.map(d => d.grade);
+            const sum = grades.reduce((acc, curr) => acc + curr, 0);
+            const avg = grades.length > 0 ? (sum / grades.length).toFixed(1) : 0;
+
+            document.getElementById('calcSum').innerText = sum;
+            document.getElementById('calcAvg').innerText = avg;
+        }
+
+        function initExcelChart() {
+            const canvas = document.getElementById('excelBarChart');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+
+            appState.chartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: appState.excelData.map(d => d.name),
+                    datasets: [{
+                        label: 'Nilai Informatika Murid',
+                        data: appState.excelData.map(d => d.grade),
+                        backgroundColor: 'rgba(124, 154, 142, 0.9)',
+                        borderColor: 'rgba(31, 42, 68, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { beginAtZero: true, max: 100, ticks: { font: { size: 10 } } },
+                        x: {
+                            ticks: { 
+                                font: { size: 10, weight: 'bold' },
+                                callback: function(val) {
+                                    let label = this.getLabelForValue(val);
+                                    return label.length > 12 ? label.substring(0, 10) + '..' : label;
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { callbacks: { label: (c) => ` Nilai: ${c.parsed.y}` } }
+                    }
+                }
+            });
+        }
+
+        function updateChartData() {
+            if (!appState.chartInstance) return;
+            appState.chartInstance.data.labels = appState.excelData.map(d => d.name);
+            appState.chartInstance.data.datasets[0].data = appState.excelData.map(d => d.grade);
+            appState.chartInstance.update();
+        }
+
+        function showSlide(slideNum) {
+            const viewer = document.getElementById('slideViewer');
+            const transition = document.getElementById('transitionEffect')?.value || 'fade';
+            if (!viewer) return;
+
+            let slideHTML = '';
+            if (slideNum === 1) {
+                slideHTML = `
+                    <div class="space-y-3">
+                        <span class="text-3xl">🚀</span>
+                        <h3 class="text-lg font-bold text-[#1F2A44] tracking-wide">SMA KARTIKA XIX-1 BANDUNG</h3>
+                        <p class="text-xs text-[#7C9A8E] font-semibold uppercase tracking-wider">Perkenalan Kelompok Digital Explorers</p>
+                        <div class="pt-3 border-t border-[#D9DEE5] text-xs text-[#2F343B] font-medium">
+                            Tim Siswa: Anggota 1 • Anggota 2 • Anggota 3
+                        </div>
+                    </div>
+                `;
+            } else if (slideNum === 2) {
+                slideHTML = `
+                    <div class="space-y-3 w-full">
+                        <h4 class="text-xs font-bold text-[#1F2A44] uppercase tracking-wide border-b pb-1">💡 3 Fitur Perkantoran yang Dikuasai</h4>
+                        <div class="grid grid-cols-3 gap-2 text-center pt-2">
+                            <div class="p-2 bg-[#F3EDE4] rounded border border-[#D9DEE5]">
+                                <span class="text-xl block">📝</span>
+                                <span class="text-[10px] font-bold text-[#1F2A44]">Word Formatting</span>
+                            </div>
+                            <div class="p-2 bg-[#F3EDE4] rounded border border-[#D9DEE5]">
+                                <span class="text-xl block">📈</span>
+                                <span class="text-[10px] font-bold text-[#1F2A44]">Excel Charting</span>
+                            </div>
+                            <div class="p-2 bg-[#F3EDE4] rounded border border-[#D9DEE5]">
+                                <span class="text-xl block">💻</span>
+                                <span class="text-[10px] font-bold text-[#1F2A44]">PPT Transitions</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else if (slideNum === 3) {
+                slideHTML = `
+                    <div class="space-y-3">
+                        <span class="text-2xl">🎯</span>
+                        <h4 class="text-sm font-bold text-[#1F2A44]">KOMPETENSI DIGITAL FASE E</h4>
+                        <p class="text-xs text-[#2F343B] leading-relaxed px-4 font-medium">"Mampu mengintegrasikan aplikasi pengolah kata, lembar kerja, dan presentasi untuk memecahkan masalah sekolah."</p>
+                    </div>
+                `;
+            }
+
+            viewer.style.opacity = '0';
+            if (transition === 'zoom') viewer.style.transform = 'scale(0.9)';
+            if (transition === 'slide') viewer.style.transform = 'translateX(25px)';
+
+            setTimeout(() => {
+                viewer.innerHTML = slideHTML;
+                viewer.style.opacity = '1';
+                viewer.style.transform = 'none';
+            }, 180);
+
+            for (let i = 1; i <= 3; i++) {
+                const btn = document.getElementById('btnSlide' + i);
+                if (btn) {
+                    if (i === slideNum) {
+                        btn.style.backgroundColor = '#1F2A44';
+                        btn.style.color = '#FFFFFF';
+                    } else {
+                        btn.style.backgroundColor = '#D9DEE5';
+                        btn.style.color = '#2F343B';
+                    }
+                }
+            }
+        }
+
+        function claimStamp(stationKey) {
+            appState.stamps[stationKey] = true;
+            const navBadge = document.getElementById('badge-' + stationKey);
+            if (navBadge) {
+                navBadge.innerText = "VERIFIKASI ✓";
+                navBadge.className = "text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold";
+            }
+            updateStampVisual(stationKey);
+            updateTotalProgress();
+            saveCurrentGroupSession();
+        }
+
+        function updateTotalProgress() {
+            const completed = Object.values(appState.stamps).filter(Boolean).length;
+            const percentage = (completed / 4) * 100;
+
+            document.getElementById('progressText').innerText = completed + ' / 4 Stempel';
+            document.getElementById('progressBar').style.width = percentage + '%';
+
+            const passportStatus = document.getElementById('finalPassportStatus');
+            const banner = document.getElementById('certUnlockedBanner');
+
+            if (completed === 4) {
+                passportStatus.innerText = "PASPOR LENGKAP 🎉";
+                passportStatus.className = "inline-block bg-emerald-700 text-white font-bold text-xs px-3 py-1 rounded-full shadow animate-pulse";
+                if (banner) banner.classList.remove('hidden');
+            } else {
+                passportStatus.innerText = completed + '/4 Stempel Verifikasi';
+                passportStatus.className = "inline-block bg-slate-200 text-slate-800 font-bold text-xs px-3 py-1 rounded-full";
+                if (banner) banner.classList.add('hidden');
+            }
+        }
+
+        function renderCertificateCanvas(customGroupData = null) {
+            const canvas = document.getElementById('certificateCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+
+            const groupName = customGroupData?.groupName || document.getElementById('groupName')?.value.trim() || 'KELOMPOK DIGITAL EXPLORERS';
+            const groupMembers = customGroupData?.groupMembers || document.getElementById('groupMembers')?.value.trim() || 'Murid A, Murid B, Murid C';
+
+            appState.activeCertData = { groupName, groupMembers };
+
+            canvas.width = 1200;
+            canvas.height = 850;
+
+            ctx.fillStyle = '#F3EDE4';
+            ctx.fillRect(0, 0, 1200, 850);
+
+            ctx.strokeStyle = '#7C9A8E';
+            ctx.lineWidth = 14;
+            ctx.strokeRect(30, 30, 1140, 790);
+
+            ctx.strokeStyle = '#1F2A44';
+            ctx.lineWidth = 4;
+            ctx.strokeRect(48, 48, 1104, 754);
+
+            ctx.fillStyle = '#1F2A44';
+            ctx.font = 'bold 36px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('SERTIFIKAT KETERAMPILAN DIGITAL', 600, 125);
+
+            ctx.fillStyle = '#7C9A8E';
+            ctx.font = 'bold 22px sans-serif';
+            ctx.fillText('SMA KARTIKA XIX-1 BANDUNG • FASE E / KELAS X', 600, 170);
+
+            ctx.beginPath();
+            ctx.moveTo(350, 200);
+            ctx.lineTo(850, 200);
+            ctx.strokeStyle = '#D9DEE5';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            ctx.fillStyle = '#2F343B';
+            ctx.font = '20px sans-serif';
+            ctx.fillText('Diberikan dengan bangga kepada:', 600, 250);
+
+            ctx.fillStyle = '#1F2A44';
+            ctx.font = 'bold 36px sans-serif';
+            ctx.fillText(groupName.toUpperCase(), 600, 305);
+
+            ctx.fillStyle = '#2F343B';
+            ctx.font = 'italic 20px sans-serif';
+            ctx.fillText('Anggota Tim: ' + groupMembers, 600, 350);
+
+            ctx.fillStyle = '#2F343B';
+            ctx.font = '20px sans-serif';
+            ctx.fillText('Atas keberhasilan menguasai dan mengaplikasikan fitur dasar Aplikasi Perkantoran:', 600, 420);
+
+            ctx.font = 'bold 20px sans-serif';
+            ctx.fillStyle = '#1F2A44';
+            ctx.fillText('• Word (Pengolah Kata) • Excel (Pengolah Angka) • PowerPoint (Presentasi)', 600, 460);
+
+            const stampLabels = ['WORD ✓', 'EXCEL ✓', 'PPT ✓', 'EXIT TICKET ✓'];
+            const stampColors = ['#1F2A44', '#7C9A8E', '#2F343B', '#9333ea'];
+
+            stampLabels.forEach((label, i) => {
+                const x = 330 + i * 180;
+                const y = 580;
+
+                ctx.beginPath();
+                ctx.arc(x, y, 42, 0, Math.PI * 2);
+                ctx.fillStyle = stampColors[i] + '15';
+                ctx.fill();
+                ctx.lineWidth = 3;
+                ctx.strokeStyle = stampColors[i];
+                ctx.stroke();
+
+                ctx.fillStyle = stampColors[i];
+                if (i === 3) {
+                    ctx.font = 'bold 9px sans-serif'; 
+                    ctx.fillText(label, x, y + 4);
+                } else {
+                    ctx.font = 'bold 12px sans-serif';
+                    ctx.fillText(label, x, y + 4);
+                }
+            });
+
+            const dateStr = new Date().toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' });
+            ctx.fillStyle = '#2F343B';
+            ctx.font = '16px sans-serif';
+            ctx.fillText('Tanggal Terbit: ' + dateStr, 600, 710);
+
+            ctx.fillStyle = '#059669';
+            ctx.font = 'bold 16px sans-serif';
+            ctx.fillText('Verifikasi Resmi Guru Informatika SMA Kartika XIX-1 Bandung (100% Selesai)', 600, 740);
+        }
+
+        function openCertificateModal(customGroupData = null) {
+            renderCertificateCanvas(customGroupData);
+            document.getElementById('certificateModal').classList.remove('hidden');
+        }
+
+        function closeCertificateModal() {
+            document.getElementById('certificateModal').classList.add('hidden');
+        }
+
+        function downloadCertificatePNG() {
+            const canvas = document.getElementById('certificateCanvas');
+            if (!canvas) return;
+
+            const name = (appState.activeCertData?.groupName || 'Kelompok').replace(/\s+/g, '_');
+            const link = document.createElement('a');
+            link.download = `Sertifikat_Paspor_Informatika_${name}.png`;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+
+        let autoSyncTimer = null;
+        let autoSyncInFlight = false;
+
+        function getGroupPayload() {
+            const groupName = document.getElementById('groupName')?.value.trim() || '';
+            const id = getOrCreateCurrentGroupId(groupName);
+
+            return {
+                id,
+                groupName: groupName || 'Kelompok Tanpa Nama',
+                groupMembers: document.getElementById('groupMembers')?.value.trim() || 'Anggota Belum Diisi',
+                stamps: { ...appState.stamps },
+                ansQ1: document.getElementById('ansQ1')?.value || '',
+                ansQ2: document.getElementById('ansQ2')?.value || '',
+                ansQ3: document.getElementById('ansQ3')?.value || '',
+                ansQ4: document.getElementById('ansQ4')?.value || '',
+                ansQ5: document.getElementById('ansQ5')?.value || '',
+                timestamp: new Date().toISOString()
+            };
+        }
+
+        function saveCurrentGroupSession(options = {}) {
+            const payload = getGroupPayload();
+            try {
+                localStorage.setItem("paspor_current_session", JSON.stringify(payload));
+            } catch (_) {}
+
+            upsertLocalTeacherRecord(payload);
+
+            if (!options.skipServerSync && payload.groupName && payload.groupName !== "Kelompok Tanpa Nama" && payload.id) {
+                pendingServerWrites.add(String(payload.id));
+                clearTimeout(autoSyncTimer);
+                autoSyncTimer = setTimeout(() => autoSyncCurrentGroup(), 1000);
+            }
+            return payload;
+        }
+
+        async function autoSyncCurrentGroup() {
+            clearTimeout(autoSyncTimer);
+            autoSyncTimer = null;
+
+            if (autoSyncInFlight) {
+                autoSyncTimer = setTimeout(() => autoSyncCurrentGroup(), 500);
+                return;
+            }
+
+            const payload = getGroupPayload();
+            if (!payload.groupName || payload.groupName === "Kelompok Tanpa Nama" || !payload.id) return;
+
+            const epochAtSend = serverEpoch ?? Number(localStorage.getItem(CLIENT_EPOCH_KEY) || 1);
+            autoSyncInFlight = true;
+            try {
+                await postToServer({ ...payload, action: "UPSERT", epoch: epochAtSend });
+                const verification = await waitForServerVerification(payload.id);
+
+                if (verification?.ok && verification.found) {
+                    pendingServerWrites.delete(String(payload.id));
+                } else if (verification?.stale) {
+                    pendingServerWrites.delete(String(payload.id));
+                    await syncTeacherDatabaseFromServer();
+                } else {
+                    pendingServerWrites.add(String(payload.id));
+                }
+            } catch (error) {
+                console.warn("[AUTO-SYNC] Gagal:", error.message);
+                if (serverEpoch === epochAtSend) {
+                    pendingServerWrites.add(String(payload.id));
+                } else {
+                    pendingServerWrites.delete(String(payload.id));
+                }
+            } finally {
+                autoSyncInFlight = false;
+                if (pendingServerWrites.has(String(payload.id)) && serverEpoch === epochAtSend) {
+                    autoSyncTimer = setTimeout(() => autoSyncCurrentGroup(), 2500);
+                }
+            }
+        }
+
+        async function submitToTeacherDashboard() {
+            const payload = getGroupPayload();
+            if (!payload.groupName || payload.groupName === 'Kelompok Tanpa Nama') {
+                alert('Isi Nama Kelompok terlebih dahulu.');
+                return;
+            }
+
+            const ok = await sendPayloadToServer(
+                { ...payload, action: 'UPSERT' },
+                'Berhasil. Data kelompok sudah masuk dan diverifikasi di Google Sheets.'
+            );
+
+            if (ok) {
+                localStorage.setItem('paspor_current_session', JSON.stringify(payload));
+                upsertLocalTeacherRecord(payload);
+            }
+        }
+
+        function exportGroupJSON() {
+            const payload = getGroupPayload();
+            const jsonStr = JSON.stringify(payload, null, 2);
+            if (navigator.clipboard?.writeText) {
+                navigator.clipboard.writeText(jsonStr)
+                    .then(() => alert('Kode JSON Paspor Kelompok telah disalin ke Clipboard.'))
+                    .catch(() => fallbackCopyText(jsonStr));
+            } else {
+                fallbackCopyText(jsonStr);
+            }
+        }
+
+        function fallbackCopyText(text) {
+            const ta = document.createElement('textarea');
+            ta.value = text;
+            ta.style.position = 'fixed';
+            ta.style.opacity = '0';
+            document.body.appendChild(ta);
+            ta.select();
+            try { document.execCommand('copy'); } catch (_) {}
+            document.body.removeChild(ta);
+            alert('Kode JSON Paspor Kelompok siap disalin.');
+        }
+
+        function escapeHtml(value) {
+            return String(value ?? '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        function renderTeacherTable() {
+            const db = getTeacherDatabase();
+            const tbody = document.getElementById('teacherTableBody');
+            const search = (document.getElementById('teacherSearchInput')?.value || '').trim().toLowerCase();
+            if (!tbody) return;
+
+            tbody.innerHTML = '';
+            const filtered = db.filter(item => String(item?.groupName || '').toLowerCase().includes(search));
+
+            let completedCount = 0;
+            let totalScoreSum = 0;
+
+            db.forEach(item => {
+                const completedStamps = Object.values(item.stamps || {}).filter(Boolean).length;
+                if (completedStamps === 4) completedCount++;
+                const stampScore = (completedStamps / 4) * 50;
+                const assessmentFilled = ['ansQ1','ansQ2','ansQ3','ansQ4','ansQ5'].filter(key => String(item[key] || '').trim() !== '').length;
+                totalScoreSum += Math.round(stampScore + (assessmentFilled / 5) * 50);
+            });
+
+            filtered.forEach(item => {
+                const completedStamps = Object.values(item.stamps || {}).filter(Boolean).length;
+                const stampScore = (completedStamps / 4) * 50;
+                const assessmentFilled = ['ansQ1','ansQ2','ansQ3','ansQ4','ansQ5'].filter(key => String(item[key] || '').trim() !== '').length;
+                const groupRealScore = Math.round(stampScore + (assessmentFilled / 5) * 50);
+                const id = String(item.id || makeStableGroupId(item.groupName));
+
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-slate-50';
+                tr.innerHTML = `
+                    <td class="p-3 border-b font-bold text-slate-900">${escapeHtml(item.groupName)}</td>
+                    <td class="p-3 border-b text-slate-700">${escapeHtml(item.groupMembers)}</td>
+                    <td class="p-3 border-b text-center font-mono">
+                        <span class="${item.stamps?.stasiun1 ? 'text-emerald-700 font-bold' : 'text-slate-400'}">W</span> •
+                        <span class="${item.stamps?.stasiun2 ? 'text-emerald-700 font-bold' : 'text-slate-400'}">E</span> •
+                        <span class="${item.stamps?.stasiun3 ? 'text-emerald-700 font-bold' : 'text-slate-400'}">P</span> •
+                        <span class="${item.stamps?.analisis ? 'text-purple-700 font-bold' : 'text-slate-400'}">ET</span>
+                    </td>
+                    <td class="p-3 border-b text-center">
+                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${groupRealScore === 100 ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}">
+                            ${groupRealScore}% Selesai
+                        </span>
+                    </td>
+                    <td class="p-3 border-b text-center space-x-1">
+                        <button type="button" data-action="edit" data-id="${escapeHtml(id)}" class="bg-amber-100 text-amber-800 hover:bg-amber-200 font-semibold px-2 py-1 rounded">✏️ Edit</button>
+                        <button type="button" data-action="detail" data-id="${escapeHtml(id)}" style="background-color: #D9DEE5; color: #1F2A44;" class="font-semibold px-2 py-1 rounded hover:opacity-90">👁️ Detail</button>
+                        <button type="button" data-action="cert" data-id="${escapeHtml(id)}" style="background-color: #1F2A44; color: #FFFFFF;" class="font-semibold px-2 py-1 rounded hover:opacity-90">📜 Sertifikat</button>
+                    </td>
+                `;
+                tr.querySelector('[data-action="edit"]').onclick = () => editGroupDataById(id);
+                tr.querySelector('[data-action="detail"]').onclick = () => openGroupDetailById(id);
+                tr.querySelector('[data-action="cert"]').onclick = () => openTeacherGroupCertById(id);
+                tbody.appendChild(tr);
+            });
+
+            const totalEl = document.getElementById('statTotalGroups');
+            const completedEl = document.getElementById('statCompletedGroups');
+            const avgEl = document.getElementById('statAvgProgress');
+            if (totalEl) totalEl.innerText = db.length;
+            if (completedEl) completedEl.innerText = completedCount;
+            if (avgEl) avgEl.innerText = (db.length ? Math.round(totalScoreSum / db.length) : 0) + '%';
+        }
+
+        function openGroupDetailById(id) {
+            const group = getTeacherDatabase().find(item => String(item?.id) === String(id));
+            if (!group) return;
+
+            document.getElementById('mGroupName').innerText = group.groupName || '';
+            document.getElementById('mGroupMembers').innerText = 'Anggota Tim: ' + (group.groupMembers || '');
+            document.getElementById('mAnsQ1').innerText = group.ansQ1 || '(Belum Diisi)';
+            document.getElementById('mAnsQ2').innerText = group.ansQ2 || '(Belum Diisi)';
+            document.getElementById('mAnsQ3').innerText = group.ansQ3 || '(Belum Diisi)';
+            document.getElementById('mAnsQ4').innerText = group.ansQ4 || '(Belum Diisi)';
+            document.getElementById('mAnsQ5').innerText = group.ansQ5 || '(Belum Diisi)';
+
+            const btnCert = document.getElementById('mBtnCert');
+            if (btnCert) btnCert.onclick = () => openTeacherGroupCertById(id);
+            document.getElementById('groupDetailModal').classList.remove('hidden');
+        }
+
+        function openTeacherGroupCertById(id) {
+            const group = getTeacherDatabase().find(item => String(item?.id) === String(id));
+            if (!group) return;
+            closeDetailModal();
+            openCertificateModal(group);
+        }
+
+        function closeDetailModal() {
+            document.getElementById('groupDetailModal').classList.add('hidden');
+        }
+
+        function openImportModal() {
+            document.getElementById('jsonImportModal').classList.remove('hidden');
+        }
+
+        function closeImportModal() {
+            document.getElementById('jsonImportModal').classList.add('hidden');
+        }
+
+        async function processJSONImport() {
+            const text = document.getElementById('jsonInputText').value.trim();
+            if (!text) return;
+
+            try {
+                const parsed = JSON.parse(text);
+                if (!parsed || !parsed.groupName) throw new Error('JSON tidak valid');
+
+                parsed.id = parsed.id || makeStableGroupId(parsed.groupName);
+                parsed.groupMembers = parsed.groupMembers || 'Anggota Belum Diisi';
+                parsed.stamps = parsed.stamps || {};
+
+                const ok = await sendPayloadToServer(
+                    { ...parsed, action: 'UPSERT' },
+                    `Data kelompok "${parsed.groupName}" berhasil diimpor ke Google Sheets.`
+                );
+
+                if (ok) {
+                    upsertLocalTeacherRecord(parsed);
+                    document.getElementById('jsonInputText').value = '';
+                    closeImportModal();
+                }
+            } catch (e) {
+                console.error(e);
+                alert('Format JSON tidak valid. Pastikan menyalin seluruh kode dari Murid.');
+            }
+        }
+
+        function csvEscape(value) {
+            return '"' + String(value ?? '').replace(/"/g, '""') + '"';
+        }
+
+        function exportTeacherCSV() {
+            const db = getTeacherDatabase();
+            if (db.length === 0) {
+                alert('Belum ada data kelompok yang tersimpan!');
+                return;
+            }
+
+            const rows = [
+                ['ID', 'Nama Kelompok', 'Anggota', 'Stempel Word', 'Stempel Excel', 'Stempel PPT', 'Stempel Exit Ticket', 'Soal 1', 'Soal 2', 'Soal 3', 'Soal 4', 'Soal 5']
+            ];
+
+            db.forEach(g => rows.push([
+                g.id || '',
+                g.groupName || '',
+                g.groupMembers || '',
+                g.stamps?.stasiun1 ? 'YA' : 'TIDAK',
+                g.stamps?.stasiun2 ? 'YA' : 'TIDAK',
+                g.stamps?.stasiun3 ? 'YA' : 'TIDAK',
+                g.stamps?.analisis ? 'YA' : 'TIDAK',
+                g.ansQ1 || '', g.ansQ2 || '', g.ansQ3 || '', g.ansQ4 || '', g.ansQ5 || ''
+            ]));
+
+            const csv = '\uFEFF' + rows.map(row => row.map(csvEscape).join(',')).join('\r\n');
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'Rekap_Paspor_Informatika_SMA_Kartika_XIX_1.csv';
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            URL.revokeObjectURL(url);
+        }
+
+        async function clearAllTeacherData() {
+            if (!confirm("Apakah Kamu yakin ingin menghapus SELURUH data kelompok dari Google Sheets dan semua perangkat?")) return;
+
+            clearTimeout(autoSyncTimer);
+            autoSyncTimer = null;
+            pendingServerWrites.clear();
+
+            try {
+                // Server menaikkan epoch. Semua perangkat lain yang polling akan
+                // mendeteksi perubahan epoch dan menghapus state lokalnya sendiri.
+                await postToServer({
+                    action: "CLEAR_ALL",
+                    epoch: serverEpoch ?? Number(localStorage.getItem(CLIENT_EPOCH_KEY) || 1)
+                });
+
+                // Jangan menunggu response POST karena no-cors bersifat opaque.
+                // Verifikasi dilakukan melalui GET sampai epoch berubah dan data kosong.
+                let verified = false;
+                for (let i = 0; i < 8; i++) {
+                    await new Promise(resolve => setTimeout(resolve, 400 + i * 150));
+                    const result = await syncTeacherDatabaseFromServer();
+                    if (result.ok && result.count === 0) {
+                        verified = true;
+                        break;
+                    }
+                }
+
+                if (!verified) {
+                    throw new Error("Reset server belum dapat diverifikasi.");
+                }
+
+                clearLocalPassportStateAfterGlobalReset();
+                alert("Seluruh data kelompok telah dibersihkan dan reset global sudah tersinkron ke perangkat yang aktif.");
+            } catch (error) {
+                console.error("[CLEAR_ALL]", error);
+                alert("Penghapusan belum dapat diverifikasi. Jangan memasukkan data baru sampai sinkronisasi berhasil.");
+            }
+        }
+
+        async function syncPollDataFromServer() {
+            try {
+                const url = WEB_APP_URL + "?action=read_poll&t=" + Date.now();
+                const response = await fetch(url, { method: "GET", cache: "no-store" });
+                const data = await response.json();
+                
+                if (data && typeof data === 'object' && !data.error) {
+                    appState.pollVotes = data;
+                    if (appState.view === 'smartboard' && pollDataStore[currentPollKey]) {
+                        updatePollChartConfig(pollDataStore[currentPollKey].labels, appState.pollVotes[currentPollKey]);
+                        updatePollStats();
+                    }
+                }
+            } catch (e) {
+                console.warn("Sinkronisasi polling tertunda:", e);
+            }
+        }
+
+        async function sendVoteToServer(key, index) {
+            try {
+                const payload = { action: "UPDATE_POLL", key: key, index: index };
+                await postToServer(payload);
+                setTimeout(() => syncPollDataFromServer(), 500);
+            } catch (e) {
+                console.warn("Gagal mengirim suara ke server:", e);
+            }
+        }
+    </script>
+</body>
+</html>
