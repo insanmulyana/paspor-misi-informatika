@@ -12,7 +12,7 @@
     <style>
         :root {
             --nav-dark: #1F2A44;
-            --sage: #7C9A8E;
+            --sage: #CEEAD6;
             --beige: #FAFAFA;
             --cool-gray: #D9DEE5;
             --charcoal: #2F343B;
@@ -95,7 +95,7 @@
             <div class="flex items-center gap-4">
                 <!-- Mode Toggle Buttons -->
                 <div style="background-color: #2F343B;" class="p-1.5 rounded-xl border border-slate-700 flex text-xs gap-1">
-                    <button type="button" onclick="switchMainView('smartboard')" id="btnViewSmartboard" class="px-3 py-1.5 rounded-lg font-bold bg-[#7C9A8E] text-[#1F2A44] shadow flex items-center gap-1.5 transition">
+                    <button type="button" onclick="switchMainView('smartboard')" id="btnViewSmartboard" class="px-3 py-1.5 rounded-lg font-bold bg-[#CEEAD6] text-[#1F2A44] shadow flex items-center gap-1.5 transition">
                         <span>🖥️</span> Ruang Diskusi
                     </button>
                     <button type="button" onclick="switchMainView('Murid')" id="btnViewMurid" class="px-3 py-1.5 rounded-lg font-bold text-white hover:text-slate-200 flex items-center gap-1.5 transition">
@@ -113,7 +113,7 @@
                         <div id="progressText" class="font-bold text-white">0 / 4 Stempel</div>
                     </div>
                     <div style="background-color: #2F343B;" class="w-24 rounded-full h-3 p-0.5 border border-slate-700">
-                        <div id="progressBar" class="bg-[#7C9A8E] h-full rounded-full transition-all duration-500 w-0"></div>
+                        <div id="progressBar" class="bg-[#CEEAD6] h-full rounded-full transition-all duration-500 w-0"></div>
                     </div>
                 </div>
             </div>
@@ -124,7 +124,7 @@
     <div id="guruPinModal" role="dialog" aria-modal="true" aria-labelledby="guruPinTitle">
         <div class="pin-modal-card">
             <div class="flex items-center gap-2.5 mb-3">
-                <div style="background-color:#7C9A8E; color:#1F2A44;" class="w-8 h-8 rounded-lg flex items-center justify-center text-sm">🔒</div>
+                <div style="background-color:#CEEAD6; color:#1F2A44;" class="w-8 h-8 rounded-lg flex items-center justify-center text-sm">🔒</div>
                 <div>
                     <h3 id="guruPinTitle" style="color:#1F2A44;" class="font-bold text-sm">Akses Dasbor Guru</h3>
                 </div>
@@ -189,7 +189,7 @@
                     <div style="background-color: #FAFAFA; border-color: #D9DEE5;" class="p-6 rounded-2xl border shadow-sm space-y-5">
                         <div class="flex items-center justify-between border-b border-slate-300 pb-3">
                             <span id="pollCategoryBadge" style="color: #FFFFFF; background-color: #1F2A44;" class="text-xs font-bold uppercase px-2.5 py-1 rounded">Polling Level 1</span>
-                            <span style="background-color: #7C9A8E; color: #1F2A44;" class="text-xs font-bold px-2.5 py-1 rounded">Smartboard Touch</span>
+                            <span style="background-color: #CEEAD6; color: #1F2A44;" class="text-xs font-bold px-2.5 py-1 rounded">Smartboard Touch</span>
                         </div>
 
                         <h4 id="pollQuestionText" style="color: #1F2A44;" class="font-extrabold text-base leading-snug">
@@ -255,8 +255,9 @@
                         <span style="color: #1F2A44;" class="text-xs font-bold uppercase block">Skema Rotasi Searah</span>
                         <p class="text-[11px] text-[#2F343B] leading-relaxed font-medium">
                             • Menyelesaikan Stasiun 1 (Word) ➔ 15 Menit<br>
-                            • Menyelesaikan Stasiun 1 (Excel) ➔ 15 Menit<br>
-                            • Menyelesaikan Stasiun 1 (Powerpoint) ➔ 15 Menit
+                            • Menyelesaikan Stasiun 2 (Excel) ➔ 15 Menit<br>
+                            • Menyelesaikan Stasiun 3 (Powerpoint) ➔ 15 Menit<br>
+                            • Menyelesaikan Exit Ticket (Asesmen dan Refleksi) ➔ 10 Menit
                         </p>
                     </div>
                 </div>
@@ -855,7 +856,7 @@
                 <!-- Send to Teacher Dashboard Actions & Badge / Certificate Banner -->
                 <div class="space-y-4">
                     <!-- Certificate Unlock Trigger Banner (Visible when completed) -->
-                    <div id="certUnlockedBanner" style="background-color: #1F2A44; color: #FFFFFF;" class="hidden rounded-xl p-4 shadow-lg flex flex-col sm:flex-row items-center justify-between gap-4 animate-bounce-subtle border border-[#7C9A8E]">
+                    <div id="certUnlockedBanner" style="background-color: #1F2A44; color: #FFFFFF;" class="hidden rounded-xl p-4 shadow-lg flex flex-col sm:flex-row items-center justify-between gap-4 animate-bounce-subtle border border-[#CEEAD6]">
                         <div class="flex items-center gap-3">
                             <span class="text-4xl">🏆</span>
                             <div>
@@ -863,7 +864,7 @@
                                 <p class="text-xs text-[#D9DEE5]">Kelompok kamu telah menyelesaikan 3 stasiun & Exit Ticket. Cetak Sertifikat Keterampilan Digital sekarang!</p>
                             </div>
                         </div>
-                        <button type="button" onclick="openCertificateModal()" style="background-color: #7C9A8E; color: #1F2A44;" class="font-extrabold text-xs px-5 py-2.5 rounded-lg shadow transition transform hover:scale-105 flex items-center gap-2">
+                        <button type="button" onclick="openCertificateModal()" style="background-color: #CEEAD6; color: #1F2A44;" class="font-extrabold text-xs px-5 py-2.5 rounded-lg shadow transition transform hover:scale-105 flex items-center gap-2">
                             <span>📜 Unduh Sertifikat Kelompok</span>
                         </button>
                     </div>
@@ -893,7 +894,7 @@
             <!-- Teacher Lock/Unlock Banner -->
             <section style="background-color: #1F2A44;" class="text-white rounded-xl p-5 shadow-md flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
-                    <div style="background-color: #7C9A8E; color: #1F2A44;" class="text-xs px-3 py-1 rounded-full font-bold mb-2 inline-block">
+                    <div style="background-color: #CEEAD6; color: #1F2A44;" class="text-xs px-3 py-1 rounded-full font-bold mb-2 inline-block">
                         <span>🔒 PANEL REKAPITULASI GURU</span>
                     </div>
                     <h2 class="text-xl font-bold">Dasbor Pemantauan Paspor Misi Informatika</h2>
@@ -903,7 +904,7 @@
                     <button type="button" onclick="exportTeacherCSV()" class="bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs px-4 py-2.5 rounded-lg shadow transition flex items-center gap-1.5">
                         <span>📥 Unduh Rekap CSV</span>
                     </button>
-                    <button type="button" onclick="openImportModal()" style="background-color: #7C9A8E; color: #1F2A44;" class="font-bold text-xs px-4 py-2.5 rounded-lg shadow transition hover:opacity-90">
+                    <button type="button" onclick="openImportModal()" style="background-color: #CEEAD6; color: #1F2A44;" class="font-bold text-xs px-4 py-2.5 rounded-lg shadow transition hover:opacity-90">
                         ➕ Impor Data JSON
                     </button>
                 </div>
@@ -1319,7 +1320,7 @@
             const active = !!appState.stamps[stationKey];
             const map = {
                 stasiun1: ["stampBox1", "stampIcon1", "stampTitle1", "stampStatus1", "📝", "border-[#1F2A44] bg-[#FAFAFA] text-[#1F2A44]"],
-                stasiun2: ["stampBox2", "stampIcon2", "stampTitle2", "stampStatus2", "📊", "border-[#7C9A8E] bg-[#FAFAFA] text-[#1F2A44]"],
+                stasiun2: ["stampBox2", "stampIcon2", "stampTitle2", "stampStatus2", "📊", "border-[#CEEAD6] bg-[#FAFAFA] text-[#1F2A44]"],
                 stasiun3: ["stampBox3", "stampIcon3", "stampTitle3", "stampStatus3", "💻", "border-amber-700 bg-amber-50 text-amber-900"],
                 analisis: ["stampBox4", "stampIcon4", "stampTitle4", "stampStatus4", "🎟️", "border-purple-700 bg-purple-50 text-purple-900"]
             };
@@ -1523,17 +1524,17 @@
 
             if (targetView === 'smartboard') {
                 viewSmartboard.classList.remove('hidden');
-                btnSmartboard.className = "px-3 py-1.5 rounded-lg font-bold bg-[#7C9A8E] text-[#1F2A44] shadow flex items-center gap-1.5 transition";
+                btnSmartboard.className = "px-3 py-1.5 rounded-lg font-bold bg-[#CEEAD6] text-[#1F2A44] shadow flex items-center gap-1.5 transition";
                 if (headerProgress) headerProgress.classList.add('hidden');
                 if (appState.pollChartInstance) setTimeout(() => appState.pollChartInstance.resize(), 150);
             } else if (targetView === 'guru') {
                 viewGuru.classList.remove('hidden');
-                btnGuru.className = "px-3 py-1.5 rounded-lg font-bold bg-[#7C9A8E] text-[#1F2A44] shadow flex items-center gap-1.5 transition";
+                btnGuru.className = "px-3 py-1.5 rounded-lg font-bold bg-[#CEEAD6] text-[#1F2A44] shadow flex items-center gap-1.5 transition";
                 if (headerProgress) headerProgress.classList.add('hidden');
                 renderTeacherTable();
             } else {
                 viewMurid.classList.remove('hidden');
-                btnMurid.className = "px-3 py-1.5 rounded-lg font-bold bg-[#7C9A8E] text-[#1F2A44] shadow flex items-center gap-1.5 transition";
+                btnMurid.className = "px-3 py-1.5 rounded-lg font-bold bg-[#CEEAD6] text-[#1F2A44] shadow flex items-center gap-1.5 transition";
                 if (headerProgress) headerProgress.classList.remove('hidden');
             }
         }
@@ -1968,7 +1969,7 @@
                     <div class="space-y-3">
                         <span class="text-3xl">🚀</span>
                         <h3 class="text-lg font-bold text-[#1F2A44] tracking-wide">SMA KARTIKA XIX-1 BANDUNG</h3>
-                        <p class="text-xs text-[#7C9A8E] font-semibold uppercase tracking-wider">Perkenalan Kelompok Digital Explorers</p>
+                        <p class="text-xs text-[#CEEAD6] font-semibold uppercase tracking-wider">Perkenalan Kelompok Digital Explorers</p>
                         <div class="pt-3 border-t border-[#D9DEE5] text-xs text-[#2F343B] font-medium">
                             Tim Siswa: Anggota 1 • Anggota 2 • Anggota 3
                         </div>
@@ -2077,7 +2078,7 @@
             ctx.fillStyle = '#FAFAFA';
             ctx.fillRect(0, 0, 1200, 850);
 
-            ctx.strokeStyle = '#7C9A8E';
+            ctx.strokeStyle = '#CEEAD6';
             ctx.lineWidth = 14;
             ctx.strokeRect(30, 30, 1140, 790);
 
@@ -2090,7 +2091,7 @@
             ctx.textAlign = 'center';
             ctx.fillText('SERTIFIKAT KETERAMPILAN DIGITAL', 600, 125);
 
-            ctx.fillStyle = '#7C9A8E';
+            ctx.fillStyle = '#CEEAD6';
             ctx.font = 'bold 22px sans-serif';
             ctx.fillText('SMA KARTIKA XIX-1 BANDUNG • FASE E / KELAS X', 600, 170);
 
@@ -2122,7 +2123,7 @@
             ctx.fillText('• Word (Pengolah Kata) • Excel (Pengolah Angka) • PowerPoint (Presentasi)', 600, 460);
 
             const stampLabels = ['WORD ✓', 'EXCEL ✓', 'PPT ✓', 'EXIT TICKET ✓'];
-            const stampColors = ['#1F2A44', '#7C9A8E', '#2F343B', '#9333ea'];
+            const stampColors = ['#1F2A44', '#CEEAD6', '#2F343B', '#9333ea'];
 
             stampLabels.forEach((label, i) => {
                 const x = 330 + i * 180;
