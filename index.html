@@ -13,7 +13,7 @@
         :root {
             --nav-dark: #1F2A44;
             --sage: #7C9A8E;
-            --beige: #F8F9FA;
+            --beige: #FAFAFA;
             --cool-gray: #D9DEE5;
             --charcoal: #2F343B;
         }
@@ -152,7 +152,7 @@
         <!-- ================= VIEW 1: Ruang Diskusi GURU ================= -->
         <div id="view-smartboard" class="space-y-6">
             <!-- Smartboard Secondary Navigation Tabs -->
-            <div style="background-color: #F8F9FA; border-color: #D9DEE5;" class="flex flex-wrap items-center justify-between gap-3 p-3 rounded-xl border shadow-sm">
+            <div style="background-color: #FAFAFA; border-color: #D9DEE5;" class="flex flex-wrap items-center justify-between gap-3 p-3 rounded-xl border shadow-sm">
                 <div class="flex gap-2">
                     <button type="button" onclick="switchSmartboardTab('polling')" id="sbTabBtn-polling" style="background-color: #1F2A44; color: #FFFFFF;" class="px-4 py-2 rounded-lg text-xs font-bold shadow flex items-center gap-2 transition">
                         <span>📊</span> Polling Asesmen Awal
@@ -178,7 +178,7 @@
                             Sentuh tombol pilihan di ruang diskusi berdasarkan tunjuk tangan Murid untuk memetakan kesiapan awal kelas secara langsung.
                         </p>
                     </div>
-                    <div style="background-color: #F8F9FA; border-color: #D9DEE5;" class="flex gap-2 p-1 rounded-lg border">
+                    <div style="background-color: #FAFAFA; border-color: #D9DEE5;" class="flex gap-2 p-1 rounded-lg border">
                         <button type="button" onclick="switchPollLevel(1)" id="pollLevelBtn1" style="background-color: #1F2A44; color: #FFFFFF;" class="px-3 py-1.5 rounded font-bold text-xs shadow">Level 1 (Frekuensi)</button>
                         <button type="button" onclick="switchPollLevel(2)" id="pollLevelBtn2" style="background-color: #D9DEE5; color: #2F343B;" class="px-3 py-1.5 rounded font-bold text-xs hover:bg-slate-300">Level 2 (Pilihan Aplikasi)</button>
                     </div>
@@ -186,7 +186,7 @@
 
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     <!-- Left: Interactive Voting Touch Card -->
-                    <div style="background-color: #F8F9FA; border-color: #D9DEE5;" class="p-6 rounded-2xl border shadow-sm space-y-5">
+                    <div style="background-color: #FAFAFA; border-color: #D9DEE5;" class="p-6 rounded-2xl border shadow-sm space-y-5">
                         <div class="flex items-center justify-between border-b border-slate-300 pb-3">
                             <span id="pollCategoryBadge" style="color: #FFFFFF; background-color: #1F2A44;" class="text-xs font-bold uppercase px-2.5 py-1 rounded">Polling Level 1</span>
                             <span style="background-color: #7C9A8E; color: #1F2A44;" class="text-xs font-bold px-2.5 py-1 rounded">Smartboard Touch</span>
@@ -207,7 +207,7 @@
                     </div>
 
                     <!-- Right: Real-Time Chart.js Visualization -->
-                    <div style="background-color: #F8F9FA; border-color: #D9DEE5;" class="p-6 rounded-2xl border shadow-sm space-y-4 flex flex-col justify-between">
+                    <div style="background-color: #FAFAFA; border-color: #D9DEE5;" class="p-6 rounded-2xl border shadow-sm space-y-4 flex flex-col justify-between">
                         <div class="flex items-center justify-between border-b border-slate-300 pb-3">
                             <h4 style="color: #1F2A44;" class="font-bold text-sm">📊 Hasil Polling Diagnostik Real-Time</h4>
                             <span class="text-[10px] text-slate-600 font-mono font-bold">Chart.js Engine</span>
@@ -235,7 +235,7 @@
                         <div id="timerDisplay" class="text-6xl font-mono font-black text-white my-3">16:00</div>
                         <div id="timerStatusLabel" class="text-xs text-[#D9DEE5]">Rotasi Stasiun Berjalan</div>
                     </div>
-                    <div style="background-color: #F8F9FA; border-color: #D9DEE5;" class="p-6 rounded-2xl border shadow-sm flex flex-col justify-between items-center text-center space-y-3">
+                    <div style="background-color: #FAFAFA; border-color: #D9DEE5;" class="p-6 rounded-2xl border shadow-sm flex flex-col justify-between items-center text-center space-y-3">
                         <span class="text-xs font-bold text-[#1F2A44] uppercase">Kontrol Smartboard Timer (Khusus Guru)</span>
                         <!-- Custom Timer Settings -->
                         <div class="w-full bg-white p-2.5 rounded-lg border border-slate-300 flex items-center justify-between text-xs">
@@ -251,7 +251,7 @@
                             <button type="button" onclick="resetTimer()" class="w-1/3 bg-rose-800 text-white font-bold text-xs py-2 rounded-xl shadow">Reset</button>
                         </div>
                     </div>
-                    <div style="background-color: #F8F9FA; border-color: #D9DEE5;" class="p-6 rounded-2xl border shadow-sm text-left space-y-2">
+                    <div style="background-color: #FAFAFA; border-color: #D9DEE5;" class="p-6 rounded-2xl border shadow-sm text-left space-y-2">
                         <span style="color: #1F2A44;" class="text-xs font-bold uppercase block">Skema Rotasi Searah</span>
                         <p class="text-[11px] text-[#2F343B] leading-relaxed font-medium">
                             • Kel. 1, 2, 3, & 4: Word ➔ Excel ➔ PPT<br>
@@ -262,7 +262,7 @@
                 </div>
 
                 <!-- Detail Alur Waktu Rotasi (Sesuai Lampiran Guru) -->
-                <div style="background-color: #F8F9FA; border-color: #D9DEE5;" class="rounded-2xl border shadow-sm overflow-hidden p-5 space-y-3">
+                <div style="background-color: #FAFAFA; border-color: #D9DEE5;" class="rounded-2xl border shadow-sm overflow-hidden p-5 space-y-3">
                     <h4 style="color: #1F2A44;" class="font-bold text-sm flex items-center gap-2">
                         <span>📋 Panduan Alur Waktu Pembelajaran Inti (Total 60 Menit)</span>
                     </h4>
@@ -279,35 +279,35 @@
                                 <tr>
                                     <td class="p-2.5 border font-bold">Menit ke-0 s.d. 3</td>
                                     <td class="p-2.5 border text-center font-mono font-bold">3 Menit</td>
-                                    <td class="p-2.5 border">Guru menjelaskan skema rotasi di Smartboard dan menempatkan tiap kelompok ke stasiun awal.</td>
+                                    <td class="p-2.5 border">Guru menjelaskan skema Stasiun di Smartboard dan menempatkan tiap kelompok ke stasiun awal.</td>
                                 </tr>
-                                <tr style="background-color: #F8F9FA;">
-                                    <td class="p-2.5 border font-bold">Rotasi 1</td>
-                                    <td class="p-2.5 border text-center font-mono font-bold">16 Menit</td>
+                                <tr style="background-color: #FAFAFA;">
+                                    <td class="p-2.5 border font-bold">Stasiun 1</td>
+                                    <td class="p-2.5 border text-center font-mono font-bold">15 Menit</td>
                                     <td class="p-2.5 border">Kelompok bekerja di stasiun pertama (Memahami fitur + Mengaplikasi tantangan + Verifikasi stempel).</td>
                                 </tr>
                                 <tr>
-                                    <td class="p-2.5 border font-bold">Transisi 1</td>
+                                    <td class="p-2.5 border font-bold">Jeda 1</td>
                                     <td class="p-2.5 border text-center font-mono font-bold">2 Menit</td>
-                                    <td class="p-2.5 border">Guru memberi aba-aba (bunyi/lonceng timer di Smartboard), kelompok berpindah searah jarum jam.</td>
+                                    <td class="p-2.5 border">Guru memberi aba-aba (bunyi/lonceng timer di Smartboard), kelompok selesai di stasiun 1 dan akan di stempel guru.</td>
                                 </tr>
-                                <tr style="background-color: #F8F9FA;">
-                                    <td class="p-2.5 border font-bold">Rotasi 2</td>
-                                    <td class="p-2.5 border text-center font-mono font-bold">16 Menit</td>
+                                <tr style="background-color: #FAFAFA;">
+                                    <td class="p-2.5 border font-bold">Stasiun 2</td>
+                                    <td class="p-2.5 border text-center font-mono font-bold">15 Menit</td>
                                     <td class="p-2.5 border">Kelompok bekerja di stasiun kedua.</td>
                                 </tr>
                                 <tr>
-                                    <td class="p-2.5 border font-bold">Transisi 2</td>
+                                    <td class="p-2.5 border font-bold">Jeda 2</td>
                                     <td class="p-2.5 border text-center font-mono font-bold">2 Menit</td>
-                                    <td class="p-2.5 border">Berpindah ke stasiun ketiga.</td>
+                                    <td class="p-2.5 border">Kelompok selesai di stasiun 2 dan distempel guru menandakan sudah selesai, Kemudian bersiap ke stasiun ketiga.</td>
                                 </tr>
-                                <tr style="background-color: #F8F9FA;">
-                                    <td class="p-2.5 border font-bold">Rotasi 3</td>
-                                    <td class="p-2.5 border text-center font-mono font-bold">16 Menit</td>
+                                <tr style="background-color: #FAFAFA;">
+                                    <td class="p-2.5 border font-bold">Stasiun 3</td>
+                                    <td class="p-2.5 border text-center font-mono font-bold">15 Menit</td>
                                     <td class="p-2.5 border">Kelompok bekerja di stasiun ketiga hingga seluruh Paspor Misi lengkap 3 cap.</td>
                                 </tr>
                                 <tr>
-                                    <td class="p-2.5 border font-bold">Menit ke-55 s.d. 60</td>
+                                    <td class="p-2.5 border font-bold">Menit ke-50 s.d. 60</td>
                                     <td class="p-2.5 border text-center font-mono font-bold">5 Menit</td>
                                     <td class="p-2.5 border">Kelompok merapikan stasiun dan bersiap masuk ke tahap Merefleksi & Exit Ticket.</td>
                                 </tr>
@@ -341,7 +341,7 @@
                     </button>
                 </div>
 
-                <div style="background-color: #F8F9FA; border-color: #D9DEE5;" class="text-slate-900 p-8 rounded-2xl border shadow-md text-center space-y-3">
+                <div style="background-color: #FAFAFA; border-color: #D9DEE5;" class="text-slate-900 p-8 rounded-2xl border shadow-md text-center space-y-3">
                     <div id="reflectionDisplayCard"></div>
                 </div>
             </div>
@@ -351,7 +351,7 @@
         <div id="view-Murid" class="hidden space-y-6">
 
             <!-- Team Setup & Briefing Box -->
-            <section style="background-color: #F8F9FA; border-color: #D9DEE5;" class="rounded-xl p-5 border shadow-sm">
+            <section style="background-color: #FAFAFA; border-color: #D9DEE5;" class="rounded-xl p-5 border shadow-sm">
                 <div class="flex flex-col md:flex-row gap-6 items-start md:items-center justify-between">
                     <div class="space-y-2 max-w-2xl">
                         <span style="background-color: #1F2A44; color: #FFFFFF;" class="text-xs px-3 py-1 rounded-full font-semibold">🌟 PETUNJUK PRAKTIK & MISI KELOMPOK</span>
@@ -433,7 +433,7 @@
 
             <!-- STASIUN 1: WORD -->
             <section id="content-stasiun1" class="station-content space-y-6">
-                <div style="background-color: #F8F9FA; border-left-color: #1F2A44;" class="border-l-4 p-4 rounded-r-lg">
+                <div style="background-color: #FAFAFA; border-left-color: #1F2A44;" class="border-l-4 p-4 rounded-r-lg">
                     <h3 style="color: #1F2A44;" class="font-bold text-base">🚉 STASIUN 1: PENGOLAH KATA (MICROSOFT WORD / GOOGLE DOCS)</h3>
                     <p class="text-sm text-[#2F343B] mt-1 leading-relaxed font-medium">
                         Fokus: Praktikkan pembuatan dokumen pengumuman resmi di Microsoft Word komputer Kamu. Uji penataan teks (Font & Heading), perataan paragraf (Alignment & Spacing), dan penyisipan tabel jadwal.
@@ -441,7 +441,7 @@
                 </div>
 
                 <!-- LKPD Visual Reference Image Slot -->
-                <div style="background-color: #F8F9FA; border-color: #D9DEE5;" class="p-4 rounded-xl border shadow-sm flex flex-col sm:flex-row items-center gap-4">
+                <div style="background-color: #FAFAFA; border-color: #D9DEE5;" class="p-4 rounded-xl border shadow-sm flex flex-col sm:flex-row items-center gap-4">
                     <div class="w-full sm:w-48 h-32 bg-white border border-slate-300 rounded-lg overflow-hidden flex items-center justify-center p-1">
                         <img src="https://placehold.co/240x160/1F2A44/FFFFFF?text=LKPD+Word+Guide" alt="Ilustrasi LKPD Word" class="object-cover w-full h-full rounded" onerror="this.src='https://placehold.co/240x160/7C9A8E/1F2A44?text=LKPD+Word'">
                     </div>
@@ -454,7 +454,7 @@
 
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     <!-- Fitur Kunci Checklist -->
-                    <div style="background-color: #F8F9FA; border-color: #D9DEE5;" class="p-5 rounded-xl border shadow-sm space-y-4">
+                    <div style="background-color: #FAFAFA; border-color: #D9DEE5;" class="p-5 rounded-xl border shadow-sm space-y-4">
                         <h4 style="color: #1F2A44;" class="font-bold text-sm flex items-center gap-2">
                             <span>🔍 Identifikasi Fitur Word</span>
                         </h4>
@@ -478,7 +478,7 @@
                     </div>
 
                     <!-- Interactive Word Challenge Playground -->
-                    <div style="background-color: #F8F9FA; border-color: #D9DEE5;" class="p-5 rounded-xl border shadow-sm space-y-4">
+                    <div style="background-color: #FAFAFA; border-color: #D9DEE5;" class="p-5 rounded-xl border shadow-sm space-y-4">
                         <div class="flex items-center justify-between">
                             <h4 style="color: #1F2A44;" class="font-bold text-sm flex items-center gap-2">
                                 <span>⚡ Tantangan Praktik & Live Preview</span>
@@ -546,7 +546,7 @@
 
             <!-- STASIUN 2: EXCEL -->
             <section id="content-stasiun2" class="station-content hidden space-y-6">
-                <div style="background-color: #F8F9FA; border-left-color: #1F2A44;" class="border-l-4 p-4 rounded-r-lg">
+                <div style="background-color: #FAFAFA; border-left-color: #1F2A44;" class="border-l-4 p-4 rounded-r-lg">
                     <h3 style="color: #1F2A44;" class="font-bold text-base">🚉 STASIUN 2: PENGOLAH ANGKA (MICROSOFT EXCEL / GOOGLE SHEETS)</h3>
                     <p class="text-sm text-[#2F343B] mt-1 leading-relaxed font-medium">
                         Fokus: Buka Microsoft Excel di komputer kamu. Buat tabel nilai Murid, terapkan rumus `=SUM` dan `=AVERAGE`, lalu buat Grafik Batang visual.
@@ -554,7 +554,7 @@
                 </div>
 
                 <!-- LKPD Visual Reference Image Slot -->
-                <div style="background-color: #F8F9FA; border-color: #D9DEE5;" class="p-4 rounded-xl border shadow-sm flex flex-col sm:flex-row items-center gap-4">
+                <div style="background-color: #FAFAFA; border-color: #D9DEE5;" class="p-4 rounded-xl border shadow-sm flex flex-col sm:flex-row items-center gap-4">
                     <div class="w-full sm:w-48 h-32 bg-white border border-slate-300 rounded-lg overflow-hidden flex items-center justify-center p-1">
                         <img src="https://placehold.co/240x160/7C9A8E/FFFFFF?text=LKPD+Excel+Guide" alt="Ilustrasi LKPD Excel" class="object-cover w-full h-full rounded" onerror="this.src='https://placehold.co/240x160/1F2A44/FFFFFF?text=LKPD+Excel'">
                     </div>
@@ -567,7 +567,7 @@
 
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     <!-- Fitur Kunci Checklist -->
-                    <div style="background-color: #F8F9FA; border-color: #D9DEE5;" class="p-5 rounded-xl border shadow-sm space-y-4">
+                    <div style="background-color: #FAFAFA; border-color: #D9DEE5;" class="p-5 rounded-xl border shadow-sm space-y-4">
                         <h4 style="color: #1F2A44;" class="font-bold text-sm flex items-center gap-2">
                             <span>🔍 Identifikasi Fitur Excel</span>
                         </h4>
@@ -592,7 +592,7 @@
                     </div>
 
                     <!-- Interactive Excel Simulator -->
-                    <div style="background-color: #F8F9FA; border-color: #D9DEE5;" class="p-5 rounded-xl border shadow-sm space-y-4">
+                    <div style="background-color: #FAFAFA; border-color: #D9DEE5;" class="p-5 rounded-xl border shadow-sm space-y-4">
                         <div class="flex items-center justify-between">
                             <h4 style="color: #1F2A44;" class="font-bold text-sm flex items-center gap-2">
                                 <span>⚡ Simulator Perhitungan & Grafik Batang</span>
@@ -651,7 +651,7 @@
 
             <!-- STASIUN 3: POWERPOINT -->
             <section id="content-stasiun3" class="station-content hidden space-y-6">
-                <div style="background-color: #F8F9FA; border-left-color: #1F2A44;" class="border-l-4 p-4 rounded-r-lg">
+                <div style="background-color: #FAFAFA; border-left-color: #1F2A44;" class="border-l-4 p-4 rounded-r-lg">
                     <h3 style="color: #1F2A44;" class="font-bold text-base">🚉 STASIUN 3: PEMBUAT PRESENTASI (MICROSOFT POWERPOINT / GOOGLE SLIDES)</h3>
                     <p class="text-sm text-[#2F343B] mt-1 leading-relaxed font-medium">
                         Fokus: Buka Microsoft PowerPoint di komputer. Buat slide perkenalan kelompok (Judul, Teks, Gambar/Tabel), dan berikan efek transisi slide yang mulus.
@@ -659,7 +659,7 @@
                 </div>
 
                 <!-- LKPD Visual Reference Image Slot -->
-                <div style="background-color: #F8F9FA; border-color: #D9DEE5;" class="p-4 rounded-xl border shadow-sm flex flex-col sm:flex-row items-center gap-4">
+                <div style="background-color: #FAFAFA; border-color: #D9DEE5;" class="p-4 rounded-xl border shadow-sm flex flex-col sm:flex-row items-center gap-4">
                     <div class="w-full sm:w-48 h-32 bg-white border border-slate-300 rounded-lg overflow-hidden flex items-center justify-center p-1">
                         <img src="https://placehold.co/240x160/2F343B/FFFFFF?text=LKPD+PPT+Guide" alt="Ilustrasi LKPD PPT" class="object-cover w-full h-full rounded" onerror="this.src='https://placehold.co/240x160/1F2A44/FFFFFF?text=LKPD+PPT'">
                     </div>
@@ -672,7 +672,7 @@
 
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     <!-- Fitur Kunci Checklist -->
-                    <div style="background-color: #F8F9FA; border-color: #D9DEE5;" class="p-5 rounded-xl border shadow-sm space-y-4">
+                    <div style="background-color: #FAFAFA; border-color: #D9DEE5;" class="p-5 rounded-xl border shadow-sm space-y-4">
                         <h4 style="color: #1F2A44;" class="font-bold text-sm flex items-center gap-2">
                             <span>🔍 Identifikasi Fitur PowerPoint</span>
                         </h4>
@@ -696,7 +696,7 @@
                     </div>
 
                     <!-- Interactive PowerPoint Challenge Simulator -->
-                    <div style="background-color: #F8F9FA; border-color: #D9DEE5;" class="p-5 rounded-xl border shadow-sm space-y-4">
+                    <div style="background-color: #FAFAFA; border-color: #D9DEE5;" class="p-5 rounded-xl border shadow-sm space-y-4">
                         <div class="flex items-center justify-between">
                             <h4 style="color: #1F2A44;" class="font-bold text-sm flex items-center gap-2">
                                 <span>⚡ Simulator Slide Presentasi</span>
@@ -742,7 +742,7 @@
 
             <!-- TAHAP AKHIR: EXIT TICKET (5 SOAL ANALISIS MASALAH) -->
             <section id="content-analisis" class="station-content hidden space-y-6">
-                <div style="background-color: #F8F9FA; border-left-color: #1F2A44;" class="border-l-4 p-4 rounded-r-lg">
+                <div style="background-color: #FAFAFA; border-left-color: #1F2A44;" class="border-l-4 p-4 rounded-r-lg">
                     <h3 style="color: #1F2A44;" class="font-bold text-base">🎟️ TAHAP AKHIR: EXIT TICKET (ANALISIS MASALAH)</h3>
                     <p class="text-sm text-[#2F343B] mt-1 leading-relaxed font-medium">
                         Diskusikan dan jawab 5 pertanyaan analisis masalah di bawah ini secara cermat bersama anggota kelompok kamu untuk menyelesaikan Paspor Misi Informatika.
@@ -750,7 +750,7 @@
                 </div>
 
                 <!-- 5 Exit Ticket Questions -->
-                <div style="background-color: #F8F9FA; border-color: #D9DEE5;" class="p-5 rounded-xl border shadow-sm space-y-5">
+                <div style="background-color: #FAFAFA; border-color: #D9DEE5;" class="p-5 rounded-xl border shadow-sm space-y-5">
                     <h4 style="color: #1F2A44;" class="font-bold text-sm border-b border-slate-300 pb-2 flex items-center justify-between">
                         <span>📝 Lembar Jawaban Exit Ticket Kelompok</span>
                         <span style="background-color: #D9DEE5; color: #1F2A44;" class="text-xs px-2.5 py-0.5 rounded font-bold">5 Pertanyaan Analisis</span>
@@ -798,7 +798,7 @@
                 </div>
 
                 <!-- Submit Final Assessment Button -->
-                <div style="background-color: #F8F9FA; border-color: #D9DEE5;" class="p-5 rounded-xl border shadow-sm text-center space-y-3">
+                <div style="background-color: #FAFAFA; border-color: #D9DEE5;" class="p-5 rounded-xl border shadow-sm text-center space-y-3">
                     <h4 style="color: #1F2A44;" class="font-bold text-sm">Siap Memfinalisasi Paspor Misi Informatika?</h4>
                     <p class="text-xs text-[#2F343B] max-w-lg mx-auto font-medium">Pastikan ketiga stasiun telah diklaim stempelnya dan kelima pertanyaan Exit Ticket telah diisi dengan lengkap.</p>
                     <button type="button" onclick="claimStamp('analisis')" id="btnStampFinal" style="background-color: #1F2A44; color: #FFFFFF;" class="font-bold text-sm px-8 py-3 rounded-xl shadow-lg transition transform hover:-translate-y-0.5 hover:opacity-90">
@@ -808,7 +808,7 @@
             </section>
 
             <!-- DIGITAL PASSPORT SUMMARY & VERIFICATION CARD -->
-            <section style="background-color: #F8F9FA; border-color: #1F2A44;" class="rounded-xl border-2 p-6 shadow-md space-y-6">
+            <section style="background-color: #FAFAFA; border-color: #1F2A44;" class="rounded-xl border-2 p-6 shadow-md space-y-6">
                 <div class="flex flex-col sm:flex-row items-center justify-between border-b border-slate-300 pb-4 gap-4">
                     <div class="flex items-center gap-3">
                         <div style="background-color: #1F2A44; color: #FFFFFF;" class="w-12 h-12 rounded-full flex items-center justify-center text-2xl shadow font-bold">
@@ -911,22 +911,22 @@
 
             <!-- Metrics Summary Cards -->
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div style="background-color: #F8F9FA; border-color: #D9DEE5;" class="p-4 rounded-xl border shadow-sm text-center">
+                <div style="background-color: #FAFAFA; border-color: #D9DEE5;" class="p-4 rounded-xl border shadow-sm text-center">
                     <span class="text-xs text-[#2F343B] uppercase font-bold tracking-wider">Total Kelompok Masuk</span>
                     <div id="statTotalGroups" style="color: #1F2A44;" class="text-3xl font-extrabold mt-1">0</div>
                 </div>
-                <div style="background-color: #F8F9FA; border-color: #D9DEE5;" class="p-4 rounded-xl border shadow-sm text-center">
+                <div style="background-color: #FAFAFA; border-color: #D9DEE5;" class="p-4 rounded-xl border shadow-sm text-center">
                     <span class="text-xs text-[#2F343B] uppercase font-bold tracking-wider">Kelompok Selesai (4 Stempel)</span>
                     <div id="statCompletedGroups" class="text-3xl font-extrabold text-emerald-800 mt-1">0</div>
                 </div>
-                <div style="background-color: #F8F9FA; border-color: #D9DEE5;" class="p-4 rounded-xl border shadow-sm text-center">
+                <div style="background-color: #FAFAFA; border-color: #D9DEE5;" class="p-4 rounded-xl border shadow-sm text-center">
                     <span class="text-xs text-[#2F343B] uppercase font-bold tracking-wider">Rata-Rata Ketercapaian Misi</span>
                     <div id="statAvgProgress" style="color: #1F2A44;" class="text-3xl font-extrabold mt-1">0%</div>
                 </div>
             </div>
 
             <!-- Table of Submissions -->
-            <div style="background-color: #F8F9FA; border-color: #D9DEE5;" class="rounded-xl border shadow-sm overflow-hidden">
+            <div style="background-color: #FAFAFA; border-color: #D9DEE5;" class="rounded-xl border shadow-sm overflow-hidden">
                 <div style="background-color: #D9DEE5;" class="p-4 border-b border-slate-300 flex flex-col sm:flex-row justify-between items-center gap-3">
                     <h3 style="color: #1F2A44;" class="font-bold text-sm">📋 Daftar Paspor Misi Kelompok Murid</h3>
                     <div class="flex items-center gap-2">
@@ -955,7 +955,7 @@
 
             <!-- Detail Modal View for Selected Group -->
             <div id="groupDetailModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-                <div style="background-color: #F8F9FA;" class="rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto p-6 space-y-4 shadow-2xl border border-slate-300">
+                <div style="background-color: #FAFAFA;" class="rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto p-6 space-y-4 shadow-2xl border border-slate-300">
                     <div class="flex justify-between items-start border-b border-slate-300 pb-3">
                         <div>
                             <h3 id="mGroupName" style="color: #1F2A44;" class="font-extrabold text-lg"></h3>
@@ -1001,7 +1001,7 @@
 
             <!-- JSON Import Modal -->
             <div id="jsonImportModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-                <div style="background-color: #F8F9FA;" class="rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-2xl border border-slate-300">
+                <div style="background-color: #FAFAFA;" class="rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-2xl border border-slate-300">
                     <h3 style="color: #1F2A44;" class="font-bold text-base">➕ Impor Data JSON Paspor Kelompok</h3>
                     <p class="text-xs text-[#2F343B]">Tempelkan kode JSON hasil unduhan kelompok Murid ke dalam kotak di bawah ini:</p>
                     <textarea id="jsonInputText" rows="6" placeholder='{"groupName": "Kelompok A", ...}' class="w-full text-xs font-mono p-3 border border-slate-300 rounded focus:ring-2 focus:ring-[#1F2A44]"></textarea>
@@ -1018,7 +1018,7 @@
 
     <!-- CERTIFICATE & BADGE CELEBRATION MODAL -->
     <div id="certificateModal" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-4 overflow-y-auto">
-        <div style="background-color: #F8F9FA;" class="rounded-2xl max-w-3xl w-full p-6 space-y-5 shadow-2xl my-8 relative border-4 border-[#1F2A44]">
+        <div style="background-color: #FAFAFA;" class="rounded-2xl max-w-3xl w-full p-6 space-y-5 shadow-2xl my-8 relative border-4 border-[#1F2A44]">
             <button type="button" onclick="closeCertificateModal()" class="absolute top-4 right-4 text-slate-600 hover:text-slate-900 font-bold text-xl">✕</button>
 
             <div class="text-center space-y-2">
@@ -1318,8 +1318,8 @@
         function updateStampVisual(stationKey) {
             const active = !!appState.stamps[stationKey];
             const map = {
-                stasiun1: ["stampBox1", "stampIcon1", "stampTitle1", "stampStatus1", "📝", "border-[#1F2A44] bg-[#F8F9FA] text-[#1F2A44]"],
-                stasiun2: ["stampBox2", "stampIcon2", "stampTitle2", "stampStatus2", "📊", "border-[#7C9A8E] bg-[#F8F9FA] text-[#1F2A44]"],
+                stasiun1: ["stampBox1", "stampIcon1", "stampTitle1", "stampStatus1", "📝", "border-[#1F2A44] bg-[#FAFAFA] text-[#1F2A44]"],
+                stasiun2: ["stampBox2", "stampIcon2", "stampTitle2", "stampStatus2", "📊", "border-[#7C9A8E] bg-[#FAFAFA] text-[#1F2A44]"],
                 stasiun3: ["stampBox3", "stampIcon3", "stampTitle3", "stampStatus3", "💻", "border-amber-700 bg-amber-50 text-amber-900"],
                 analisis: ["stampBox4", "stampIcon4", "stampTitle4", "stampStatus4", "🎟️", "border-purple-700 bg-purple-50 text-purple-900"]
             };
@@ -1979,15 +1979,15 @@
                     <div class="space-y-3 w-full">
                         <h4 class="text-xs font-bold text-[#1F2A44] uppercase tracking-wide border-b pb-1">💡 3 Fitur Perkantoran yang Dikuasai</h4>
                         <div class="grid grid-cols-3 gap-2 text-center pt-2">
-                            <div class="p-2 bg-[#F8F9FA] rounded border border-[#D9DEE5]">
+                            <div class="p-2 bg-[#FAFAFA] rounded border border-[#D9DEE5]">
                                 <span class="text-xl block">📝</span>
                                 <span class="text-[10px] font-bold text-[#1F2A44]">Word Formatting</span>
                             </div>
-                            <div class="p-2 bg-[#F8F9FA] rounded border border-[#D9DEE5]">
+                            <div class="p-2 bg-[#FAFAFA] rounded border border-[#D9DEE5]">
                                 <span class="text-xl block">📈</span>
                                 <span class="text-[10px] font-bold text-[#1F2A44]">Excel Charting</span>
                             </div>
-                            <div class="p-2 bg-[#F8F9FA] rounded border border-[#D9DEE5]">
+                            <div class="p-2 bg-[#FAFAFA] rounded border border-[#D9DEE5]">
                                 <span class="text-xl block">💻</span>
                                 <span class="text-[10px] font-bold text-[#1F2A44]">PPT Transitions</span>
                             </div>
@@ -2074,7 +2074,7 @@
             canvas.width = 1200;
             canvas.height = 850;
 
-            ctx.fillStyle = '#F8F9FA';
+            ctx.fillStyle = '#FAFAFA';
             ctx.fillRect(0, 0, 1200, 850);
 
             ctx.strokeStyle = '#7C9A8E';
